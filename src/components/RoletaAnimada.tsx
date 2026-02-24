@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Participante } from '../types';
 
 interface RoletaAnimadaProps {
@@ -8,15 +8,18 @@ interface RoletaAnimadaProps {
   vencedorId?: string | null;
 }
 
-const CORES_BLUE = [
-  { r: 30, g: 58, b: 138 },
-  { r: 30, g: 64, b: 175 },
-  { r: 37, g: 99, b: 235 },
-  { r: 29, g: 78, b: 216 },
-  { r: 30, g: 58, b: 138 },
-  { r: 30, g: 64, b: 175 },
-  { r: 37, g: 99, b: 235 },
-  { r: 29, g: 78, b: 216 },
+// Cores alternando: Azul, Verde, Amarelo, Roxo, Vermelho
+const CORES = [
+  { r: 59, g: 130, b: 246 },   // blue-500
+  { r: 34, g: 197, b: 94 },    // green-500
+  { r: 234, g: 179, b: 8 },    // yellow-500
+  { r: 168, g: 85, b: 247 },   // purple-500
+  { r: 239, g: 68, b: 68 },    // red-500
+  { r: 37, g: 99, b: 235 },    // blue-600
+  { r: 22, g: 163, b: 74 },    // green-600
+  { r: 202, g: 138, b: 4 },    // yellow-600
+  { r: 147, g: 51, b: 234 },   // purple-600
+  { r: 220, g: 38, b: 38 },    // red-600
 ];
 
 export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorteio, vencedorId }: RoletaAnimadaProps) {
@@ -25,7 +28,7 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
   const [vencedorAtual, setVencedorAtual] = useState<Participante | null>(null);
   const [rotacao, setRotacao] = useState(0);
   const [velocidade, setVelocidade] = useState(0);
-  const [rotacaoFinal, setRotacaoFinal] = useState(0);
+  const animationFrameRef = useRef<number>();
 
   const iniciarSorteio = async () => {
     if (participantes.length === 0) {
@@ -37,15 +40,11 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
     setMostrandoResultado(false);
     setVencedorAtual(null);
     setRotacao(0);
-    setRotacaoFinal(0);
     setVelocidade(5);
 
     let vencedorIdBackend: string | null = null;
     try {
       vencedorIdBackend = await onIniciarSorteio();
-      if (vencedorIdBackend) {
-        setVencedorAtual(null);
-      }
     } catch (error) {
       console.error('Erro ao executar sorteio:', error);
       setSorteando(false);
@@ -53,99 +52,130 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
       return;
     }
 
-    const acelerar = setInterval(() => {
-      setVelocidade((prev) => {
-        if (prev < 25) {
-          return prev + 0.3;
-        }
-        clearInterval(acelerar);
-        return prev;
-      });
-    }, 80);
+    if (!vencedorIdBackend) {
+      setSorteando(false);
+      return;
+    }
 
-    setTimeout(() => {
-      clearInterval(acelerar);
-      setVelocidade(25);
-    }, 3000);
+    const vencedor = participantes.find(p => p.id === vencedorIdBackend);
+    if (!vencedor) {
+      setSorteando(false);
+      return;
+    }
 
-    setTimeout(() => {
-      const desacelerar = setInterval(() => {
-        setVelocidade((prev) => {
-          if (prev > 0.3) {
-            return prev * 0.92;
-          }
-          clearInterval(desacelerar);
-          return 0.3;
-        });
-      }, 100);
-    }, 5000);
+    const indiceVencedor = participantes.findIndex(p => p.id === vencedorIdBackend);
+    const anguloPorParticipante = 360 / participantes.length;
+    const anguloVencedorInicio = indiceVencedor * anguloPorParticipante;
+    const anguloVencedorMeio = anguloVencedorInicio + (anguloPorParticipante / 2);
+    
+    // A seta aponta para cima (0 graus), então precisamos calcular a rotação necessária
+    // para que o meio do segmento do vencedor fique no topo
+    // Como a roleta gira no sentido horário, precisamos subtrair o ângulo
+    let rotacaoNecessaria = 360 - anguloVencedorMeio;
+    
+    // Normalizar para garantir que seja positivo
+    if (rotacaoNecessaria < 0) {
+      rotacaoNecessaria += 360;
+    }
+    
+    // Adicionar múltiplas voltas completas para efeito visual
+    const voltasCompletas = 5;
+    const rotacaoFinal = (voltasCompletas * 360) + rotacaoNecessaria;
 
-    setTimeout(() => {
-      setVelocidade(0);
-      
-      if (vencedorIdBackend) {
-        const vencedor = participantes.find(p => p.id === vencedorIdBackend);
-        if (vencedor) {
-          const indiceVencedor = participantes.findIndex(p => p.id === vencedor.id);
-          const anguloPorParticipante = 360 / participantes.length;
-          const anguloVencedor = indiceVencedor * anguloPorParticipante;
-          const rotacaoNecessaria = 360 - anguloVencedor + (anguloPorParticipante / 2);
-          const rotacaoCompleta = rotacao + 1080 + (rotacaoNecessaria % 360);
-          setRotacaoFinal(rotacaoCompleta);
-          
-          setSorteando(false);
+    const acelerarDuration = 2000; // 2 segundos acelerando
+    const velocidadeMaximaDuration = 2000; // 2 segundos na velocidade máxima
+    const desacelerarDuration = 6000; // 6 segundos desacelerando (mais tempo para parar suavemente)
+    const suspenseDuration = 2000; // 2 segundos de suspense
+
+    const startTime = Date.now();
+    let currentRotacao = 0;
+    let currentVelocidade = 5;
+
+    const animate = () => {
+      const elapsedTime = Date.now() - startTime;
+      const totalDuration = acelerarDuration + velocidadeMaximaDuration + desacelerarDuration;
+
+      if (elapsedTime < acelerarDuration) {
+        // Acelerando
+        const progresso = elapsedTime / acelerarDuration;
+        currentVelocidade = 5 + (20 * progresso);
+        currentRotacao += currentVelocidade;
+        setVelocidade(currentVelocidade);
+        setRotacao(currentRotacao);
+      } else if (elapsedTime < acelerarDuration + velocidadeMaximaDuration) {
+        // Velocidade máxima constante
+        currentVelocidade = 25;
+        currentRotacao += currentVelocidade;
+        setVelocidade(25);
+        setRotacao(currentRotacao);
+      } else if (elapsedTime < totalDuration) {
+        // Desacelerando gradualmente até parar no vencedor
+        const progressoDesaceleracao = (elapsedTime - acelerarDuration - velocidadeMaximaDuration) / desacelerarDuration;
+        const rotacaoRestante = rotacaoFinal - currentRotacao;
+        
+        // Easing out quartic (parada mais suave e gradual)
+        const easing = 1 - Math.pow(1 - progressoDesaceleracao, 4);
+        
+        // Calcular nova rotação baseada no easing, garantindo que chegue exatamente no vencedor
+        const novaRotacao = currentRotacao + (rotacaoRestante * easing * 0.15);
+        currentRotacao = novaRotacao;
+        
+        // Velocidade diminui gradualmente de forma mais suave
+        const velocidadeEasing = Math.pow(1 - progressoDesaceleracao, 3);
+        currentVelocidade = 25 * velocidadeEasing;
+        
+        setRotacao(currentRotacao);
+        setVelocidade(currentVelocidade);
+      } else {
+        // Parou - garantir que está na posição exata do vencedor
+        setRotacao(rotacaoFinal);
+        setVelocidade(0);
+        setSorteando(false);
+        
+        setTimeout(() => {
+          setMostrandoResultado(true);
           
           setTimeout(() => {
-            setMostrandoResultado(true);
-            
-            setTimeout(() => {
-              setVencedorAtual(vencedor);
-              setMostrandoResultado(false);
-              onSorteioCompleto(vencedor);
-            }, 2500);
-          }, 500);
+            setVencedorAtual(vencedor);
+            setMostrandoResultado(false);
+            onSorteioCompleto(vencedor);
+          }, suspenseDuration);
+        }, 500);
+        
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
         }
-      } else {
-        setSorteando(false);
+        return;
       }
-    }, 9000);
+
+      if (elapsedTime < totalDuration) {
+        animationFrameRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animate);
   };
 
   useEffect(() => {
-    if (!sorteando && rotacaoFinal > 0 && velocidade === 0) {
-      const targetRotacao = rotacaoFinal;
-      const diff = targetRotacao - rotacao;
-      if (Math.abs(diff) > 0.5) {
-        const step = diff * 0.15;
-        setRotacao(prev => prev + step);
-      } else {
-        setRotacao(targetRotacao);
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
       }
-      return;
-    }
-
-    if (!sorteando || velocidade === 0) {
-      return;
-    }
-
-    const intervalo = setInterval(() => {
-      setRotacao((prev) => prev + velocidade);
-    }, 16);
-
-    return () => clearInterval(intervalo);
-  }, [sorteando, velocidade, rotacaoFinal, rotacao]);
+    };
+  }, []);
 
   const vencedor = vencedorAtual || (vencedorId && participantes.find(p => p.id === vencedorId));
-  let rotacaoAtual = sorteando ? rotacao : (rotacaoFinal > 0 ? rotacaoFinal : rotacao);
 
   const gerarGradienteConic = () => {
+    if (participantes.length === 0) return 'conic-gradient(white, white)';
+    
     const stops = participantes.map((_, i) => {
       const inicio = (i * 360) / participantes.length;
       const fim = ((i + 1) * 360) / participantes.length;
-      const cor = CORES_BLUE[i % CORES_BLUE.length];
-      return `rgb(${cor.r}, ${cor.g}, ${cor.b}) ${inicio}deg, rgb(${cor.r}, ${cor.g}, ${cor.b}) ${fim}deg`;
-    }).join(', ');
-    return `conic-gradient(from 0deg, ${stops})`;
+      const cor = CORES[i % CORES.length];
+      return `rgb(${cor.r}, ${cor.g}, ${cor.b}) ${inicio}deg ${fim}deg`;
+    });
+    return `conic-gradient(${stops.join(', ')})`;
   };
 
   if (participantes.length === 0) {
@@ -213,9 +243,9 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
             </div>
 
             <div
-              className="absolute inset-0 rounded-full border-8 border-blue-300 shadow-2xl transition-transform duration-[16ms] ease-linear"
+              className="absolute inset-0 rounded-full border-8 border-white/40 shadow-2xl transition-transform duration-[16ms] ease-linear"
               style={{
-                transform: `rotate(${rotacaoAtual}deg)`,
+                transform: `rotate(${rotacao}deg)`,
                 background: gerarGradienteConic()
               }}
             >
@@ -223,21 +253,42 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
                 const anguloInicio = (index * 360) / participantes.length;
                 const anguloFim = ((index + 1) * 360) / participantes.length;
                 const meioAngulo = (anguloInicio + anguloFim) / 2;
-                const cor = CORES_BLUE[index % CORES_BLUE.length];
+                const cor = CORES[index % CORES.length];
+                
+                // Pegar apenas o primeiro nome
+                const primeiroNome = participante.nome.split(' ')[0];
+                
+                // Calcular posição abaixo da seta (mais próximo do centro)
+                const raio = 180; // Distância do centro
                 
                 return (
                   <div
                     key={participante.id}
                     className="absolute top-1/2 left-1/2 origin-center"
                     style={{
-                      transform: `translate(-50%, -50%) rotate(${meioAngulo}deg) translateY(-180px) rotate(${-meioAngulo}deg)`,
+                      transform: `translate(-50%, -50%) rotate(${meioAngulo}deg) translateY(-${raio}px)`,
                     }}
                   >
                     <div 
-                      className="px-4 py-2 rounded-lg border-2 border-white/50 text-white font-bold text-sm whitespace-nowrap shadow-lg"
-                      style={{ backgroundColor: `rgb(${cor.r}, ${cor.g}, ${cor.b})` }}
+                      style={{ 
+                        fontSize: '16px',
+                        fontWeight: '900',
+                        letterSpacing: '1.5px',
+                        lineHeight: '1.3',
+                        color: `rgb(${cor.r}, ${cor.g}, ${cor.b})`,
+                        whiteSpace: 'nowrap',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textAlign: 'center',
+                        WebkitTextStroke: '2px rgba(255,255,255,1)',
+                        textStroke: '2px rgba(255,255,255,1)',
+                        transform: 'rotate(90deg)',
+                        maxWidth: '150px',
+                        padding: '4px 8px'
+                      }}
                     >
-                      {participante.nome.substring(0, 12)}
+                      {primeiroNome}
                     </div>
                   </div>
                 );

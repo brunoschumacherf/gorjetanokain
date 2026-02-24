@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { cadastrarParticipante, cpfJaCadastrado } from '../services/participanteService';
+import { cadastrarParticipante, cpfJaCadastrado, idJaCadastrado } from '../services/participanteService';
 import { isValidCPF, formatCPF, cleanCPF } from '../utils/cpfValidator';
 import { useSorteio } from '../contexts/SorteioContext';
 
@@ -16,6 +16,7 @@ export function FormularioCadastro() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [cpfValidando, setCpfValidando] = useState(false);
+  const [idValidando, setIdValidando] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -43,6 +44,32 @@ export function FormularioCadastro() {
 
     return () => clearTimeout(timer);
   }, [formData.cpf]);
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (formData.idUsuario && formData.idUsuario.trim().length > 0) {
+        setIdValidando(true);
+        try {
+          const jaExiste = await idJaCadastrado(formData.idUsuario.trim());
+          if (jaExiste) {
+            setErrors(prev => ({ ...prev, idUsuario: 'ID do usuário já cadastrado' }));
+          } else {
+            setErrors(prev => {
+              const newErrors = { ...prev };
+              delete newErrors.idUsuario;
+              return newErrors;
+            });
+          }
+        } catch (error) {
+          console.error('Erro ao verificar ID:', error);
+        } finally {
+          setIdValidando(false);
+        }
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [formData.idUsuario]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -92,6 +119,20 @@ export function FormularioCadastro() {
     }
     if (!formData.chavePix.trim()) {
       newErrors.chavePix = 'Chave Pix é obrigatória';
+    } else {
+      // Verificar se chave PIX é CPF e se é igual ao CPF cadastrado
+      const chavePixLimpa = cleanCPF(formData.chavePix);
+      const cpfLimpo = cleanCPF(formData.cpf);
+      
+      // Se a chave PIX tem 11 dígitos, pode ser um CPF
+      if (chavePixLimpa.length === 11) {
+        if (isValidCPF(chavePixLimpa)) {
+          // É um CPF válido, verificar se é igual ao CPF cadastrado
+          if (chavePixLimpa !== cpfLimpo) {
+            newErrors.chavePix = 'Se a chave PIX for CPF, deve ser igual ao CPF cadastrado';
+          }
+        }
+      }
     }
     if (!formData.idUsuario.trim()) {
       newErrors.idUsuario = 'ID do usuário é obrigatório';
@@ -115,14 +156,20 @@ export function FormularioCadastro() {
 
     const cpfLimpo = cleanCPF(formData.cpf);
     try {
-      const jaExiste = await cpfJaCadastrado(cpfLimpo);
-      if (jaExiste) {
+      const cpfJaExiste = await cpfJaCadastrado(cpfLimpo);
+      if (cpfJaExiste) {
         setErrors({ cpf: 'CPF já cadastrado' });
         return;
       }
+      
+      const idJaExiste = await idJaCadastrado(formData.idUsuario.trim());
+      if (idJaExiste) {
+        setErrors({ idUsuario: 'ID do usuário já cadastrado' });
+        return;
+      }
     } catch (error) {
-      console.error('Erro ao verificar CPF:', error);
-      alert('Erro ao verificar CPF. Tente novamente.');
+      console.error('Erro ao verificar dados:', error);
+      alert('Erro ao verificar dados. Tente novamente.');
       return;
     }
 
@@ -333,6 +380,11 @@ export function FormularioCadastro() {
               }`}
               placeholder="Seu ID na plataforma"
             />
+            {idValidando && (
+              <p className="mt-2 text-sm text-blue-300 flex items-center gap-2 font-semibold">
+                <span className="animate-spin">⏳</span> Verificando ID...
+              </p>
+            )}
             {errors.idUsuario && (
               <p className="mt-2 text-sm text-red-300 flex items-center gap-2 font-semibold">
                 <span>⚠️</span> {errors.idUsuario}

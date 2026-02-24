@@ -16,12 +16,19 @@ import { cleanCPF } from '../utils/cpfValidator';
 import { getSorteioAtivo } from './sorteioService';
 
 const PARTICIPANTES_COLLECTION = 'paricipantes';
-const SORTEIO_COLLECTION = 'sorteios';
+const SORTEIO_COLLECTION = 'sorteio';
 
 export async function cpfJaCadastrado(cpf: string): Promise<boolean> {
   const cpfLimpo = cleanCPF(cpf);
   const participantesRef = collection(firestore, PARTICIPANTES_COLLECTION);
   const q = query(participantesRef, where('cpf', '==', cpfLimpo));
+  const querySnapshot = await getDocs(q);
+  return !querySnapshot.empty;
+}
+
+export async function idJaCadastrado(idUsuario: string): Promise<boolean> {
+  const participantesRef = collection(firestore, PARTICIPANTES_COLLECTION);
+  const q = query(participantesRef, where('id', '==', idUsuario));
   const querySnapshot = await getDocs(q);
   return !querySnapshot.empty;
 }
@@ -37,6 +44,10 @@ export async function cadastrarParticipante(
   const cpfLimpo = cleanCPF(dados.cpf);
   if (await cpfJaCadastrado(cpfLimpo)) {
     throw new Error('CPF já cadastrado neste sorteio');
+  }
+  
+  if (await idJaCadastrado(dados.idUsuario)) {
+    throw new Error('ID do usuário já cadastrado neste sorteio');
   }
   
   try {
