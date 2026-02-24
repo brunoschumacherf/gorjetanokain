@@ -136,7 +136,6 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
   }, [sorteando, velocidade, rotacaoFinal, rotacao]);
 
   const vencedor = vencedorAtual || (vencedorId && participantes.find(p => p.id === vencedorId));
-  const anguloPorParticipante = participantes.length > 0 ? 360 / participantes.length : 0;
   let rotacaoAtual = sorteando ? rotacao : (rotacaoFinal > 0 ? rotacaoFinal : rotacao);
 
   const gerarGradienteConic = () => {

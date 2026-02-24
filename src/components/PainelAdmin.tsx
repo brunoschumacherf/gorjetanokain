@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useSorteio } from '../contexts/SorteioContext';
 import { RoletaAnimada } from './RoletaAnimada';
 import type { Participante } from '../types';
@@ -41,7 +40,7 @@ export function PainelAdmin() {
     }
   };
 
-  const handleSorteioCompleto = async (vencedor: Participante) => {
+  const handleSorteioCompleto = async (_vencedor: Participante) => {
     await carregarSorteio();
     await carregarParticipantes();
   };

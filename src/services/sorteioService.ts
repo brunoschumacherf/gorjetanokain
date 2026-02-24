@@ -1,13 +1,9 @@
 import { 
   collection, 
   doc, 
-  getDoc, 
   getDocs, 
   setDoc, 
   updateDoc, 
-  deleteDoc,
-  query,
-  where,
   writeBatch,
   Timestamp 
 } from 'firebase/firestore';

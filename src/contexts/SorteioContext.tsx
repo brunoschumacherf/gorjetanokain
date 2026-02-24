@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import type { Sorteio, Participante } from '../types';
 import { getSorteioAtivo, criarSorteio, abrirSorteio, encerrarSorteio, executarSorteio, resetarSorteio } from '../services/sorteioService';
 import { listarParticipantes, buscarParticipantePorId, getTotalParticipantes } from '../services/participanteService';
