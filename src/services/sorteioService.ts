@@ -9,6 +9,7 @@ import {
 } from 'firebase/firestore';
 import { firestore } from '../config/firebase';
 import type { Sorteio } from '../types';
+import { salvarVencedor } from './vencedorService';
 
 const SORTEIO_COLLECTION = 'sorteio';
 const PARTICIPANTES_COLLECTION = 'paricipantes';
@@ -114,6 +115,15 @@ export async function executarSorteio(sorteioId: string): Promise<string | null>
   const vencedorDoc = participantes[indiceVencedor];
   const vencedorId = vencedorDoc.id;
   
+  // Salvar vencedor na coleção de vencedores (acumular histórico)
+  try {
+    await salvarVencedor(vencedorId, sorteioId);
+  } catch (error) {
+    console.error('Erro ao salvar vencedor:', error);
+    // Continua mesmo se houver erro ao salvar o histórico
+  }
+  
+  // Atualizar sorteio com o vencedor
   const sorteioRef = doc(firestore, SORTEIO_COLLECTION, sorteioId);
   await updateDoc(sorteioRef, {
     vencedorId: vencedorId

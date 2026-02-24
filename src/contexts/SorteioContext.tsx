@@ -1,17 +1,21 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { Sorteio, Participante } from '../types';
+import type { Sorteio, Participante, Vencedor } from '../types';
 import { getSorteioAtivo, criarSorteio, abrirSorteio, encerrarSorteio, executarSorteio, resetarSorteio } from '../services/sorteioService';
 import { listarParticipantes, buscarParticipantePorId, getTotalParticipantes } from '../services/participanteService';
+import { listarVencedores, getTotalVencedores } from '../services/vencedorService';
 
 interface SorteioContextType {
   sorteio: Sorteio | null;
   participantes: Participante[];
   totalParticipantes: number;
   vencedor: Participante | null;
+  vencedoresAcumulados: Vencedor[];
+  totalVencedores: number;
   loading: boolean;
   carregarSorteio: () => Promise<void>;
   carregarParticipantes: () => Promise<void>;
+  carregarVencedores: () => Promise<void>;
   criarNovoSorteio: () => Promise<void>;
   abrirSorteioAtual: () => Promise<void>;
   encerrarSorteioAtual: () => Promise<void>;
@@ -27,6 +31,8 @@ export function SorteioProvider({ children }: { children: ReactNode }) {
   const [participantes, setParticipantes] = useState<Participante[]>([]);
   const [totalParticipantes, setTotalParticipantes] = useState(0);
   const [vencedor, setVencedor] = useState<Participante | null>(null);
+  const [vencedoresAcumulados, setVencedoresAcumulados] = useState<Vencedor[]>([]);
+  const [totalVencedores, setTotalVencedores] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const carregarSorteio = async () => {
@@ -61,6 +67,19 @@ export function SorteioProvider({ children }: { children: ReactNode }) {
       setTotalParticipantes(total);
     } catch (error) {
       console.error('Erro ao atualizar total:', error);
+    }
+  };
+
+  const carregarVencedores = async () => {
+    try {
+      const lista = await listarVencedores();
+      setVencedoresAcumulados(lista);
+      const total = await getTotalVencedores();
+      setTotalVencedores(total);
+    } catch (error) {
+      console.error('Erro ao carregar vencedores:', error);
+      setVencedoresAcumulados([]);
+      setTotalVencedores(0);
     }
   };
 
@@ -118,6 +137,8 @@ export function SorteioProvider({ children }: { children: ReactNode }) {
       if (vencedorId) {
         const vencedorData = await buscarParticipantePorId(vencedorId);
         setVencedor(vencedorData);
+        // Recarregar lista de vencedores acumulados
+        await carregarVencedores();
       }
       await carregarSorteio();
       return vencedorId;
@@ -149,6 +170,7 @@ export function SorteioProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       await carregarSorteio();
       await carregarParticipantes();
+      await carregarVencedores();
       setLoading(false);
     };
     inicializar();
@@ -161,9 +183,12 @@ export function SorteioProvider({ children }: { children: ReactNode }) {
         participantes,
         totalParticipantes,
         vencedor,
+        vencedoresAcumulados,
+        totalVencedores,
         loading,
         carregarSorteio,
         carregarParticipantes,
+        carregarVencedores,
         criarNovoSorteio,
         abrirSorteioAtual,
         encerrarSorteioAtual,
