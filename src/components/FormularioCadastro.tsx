@@ -1,0 +1,354 @@
+import { useState, useEffect } from 'react';
+import { cadastrarParticipante, cpfJaCadastrado } from '../services/participanteService';
+import { isValidCPF, formatCPF, cleanCPF } from '../utils/cpfValidator';
+import { useSorteio } from '../contexts/SorteioContext';
+
+export function FormularioCadastro() {
+  const { sorteio, atualizarTotal } = useSorteio();
+  const [formData, setFormData] = useState({
+    nome: '',
+    cpf: '',
+    email: '',
+    chavePix: '',
+    idUsuario: ''
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [cpfValidando, setCpfValidando] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (formData.cpf && isValidCPF(formData.cpf)) {
+        setCpfValidando(true);
+        try {
+          const cpfLimpo = cleanCPF(formData.cpf);
+          const jaExiste = await cpfJaCadastrado(cpfLimpo);
+          if (jaExiste) {
+            setErrors(prev => ({ ...prev, cpf: 'CPF já cadastrado' }));
+          } else {
+            setErrors(prev => {
+              const newErrors = { ...prev };
+              delete newErrors.cpf;
+              return newErrors;
+            });
+          }
+        } catch (error) {
+          console.error('Erro ao verificar CPF:', error);
+        } finally {
+          setCpfValidando(false);
+        }
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [formData.cpf]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    if (name === 'cpf') {
+      const cpfLimpo = cleanCPF(value);
+      if (cpfLimpo.length <= 11) {
+        setFormData(prev => ({ ...prev, [name]: formatCPF(cpfLimpo) }));
+        
+        if (cpfLimpo.length === 11 && !isValidCPF(cpfLimpo)) {
+          setErrors(prev => ({ ...prev, cpf: 'CPF inválido' }));
+        } else if (cpfLimpo.length < 11) {
+          setErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors.cpf;
+            return newErrors;
+          });
+        }
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+      if (errors[name]) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+      }
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.nome.trim()) {
+      newErrors.nome = 'Nome é obrigatório';
+    }
+    if (!formData.cpf.trim()) {
+      newErrors.cpf = 'CPF é obrigatório';
+    } else if (!isValidCPF(formData.cpf)) {
+      newErrors.cpf = 'CPF inválido';
+    }
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email é obrigatório';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Email inválido';
+    }
+    if (!formData.chavePix.trim()) {
+      newErrors.chavePix = 'Chave Pix é obrigatória';
+    }
+    if (!formData.idUsuario.trim()) {
+      newErrors.idUsuario = 'ID do usuário é obrigatório';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!sorteio || !sorteio.aberto) {
+      alert('Cadastros não estão abertos no momento.');
+      return;
+    }
+
+    if (!validateForm()) {
+      return;
+    }
+
+    const cpfLimpo = cleanCPF(formData.cpf);
+    try {
+      const jaExiste = await cpfJaCadastrado(cpfLimpo);
+      if (jaExiste) {
+        setErrors({ cpf: 'CPF já cadastrado' });
+        return;
+      }
+    } catch (error) {
+      console.error('Erro ao verificar CPF:', error);
+      alert('Erro ao verificar CPF. Tente novamente.');
+      return;
+    }
+
+    setLoading(true);
+    setSuccess(false);
+
+    try {
+      await cadastrarParticipante({
+        nome: formData.nome.trim(),
+        cpf: cpfLimpo,
+        email: formData.email.trim(),
+        chavePix: formData.chavePix.trim(),
+        idUsuario: formData.idUsuario.trim()
+      });
+
+      setSuccess(true);
+      setFormData({
+        nome: '',
+        cpf: '',
+        email: '',
+        chavePix: '',
+        idUsuario: ''
+      });
+      setErrors({});
+      
+      try {
+        await atualizarTotal();
+      } catch (updateError) {
+        console.warn('Erro ao atualizar total, mas cadastro foi feito:', updateError);
+      }
+      
+      setTimeout(() => setSuccess(false), 5000);
+    } catch (error: any) {
+      console.error('Erro ao cadastrar:', error);
+      const errorMessage = error?.message || error?.toString() || 'Erro desconhecido';
+      
+      if (errorMessage.includes('CPF já cadastrado') || errorMessage.includes('já cadastrado')) {
+        setErrors({ cpf: 'CPF já cadastrado' });
+      } else if (errorMessage.includes('não está aberto') || errorMessage.includes('aberto')) {
+        setErrors({});
+        alert('Cadastros não estão abertos no momento.');
+      } else if (errorMessage.includes('permissão') || errorMessage.includes('permission')) {
+        setErrors({});
+        alert('Erro de permissão. Verifique as configurações do Firestore.');
+      } else {
+        setErrors({});
+        alert(`Erro ao cadastrar: ${errorMessage}. Verifique se foi salvo.`);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sorteioAberto = sorteio?.aberto === true;
+
+  return (
+    <div className="max-w-3xl mx-auto">
+      <div className="glass-strong rounded-3xl p-10 shadow-2xl glow card-hover">
+        <div className="text-center mb-10">
+          <h2 className="text-5xl font-black mb-4 shimmer-text">🎯 Cadastre-se Agora!</h2>
+          {!sorteioAberto && (
+            <div className="glass rounded-2xl p-5 text-white font-semibold text-lg border-2 border-red-400/50">
+              ⚠️ Cadastros temporariamente fechados
+            </div>
+          )}
+        </div>
+
+        {success && (
+          <div className="glass rounded-2xl p-6 mb-8 text-center border-2 border-green-400/50 animate-pulse">
+            <div className="text-4xl mb-3">✅</div>
+            <div className="text-2xl font-bold text-green-300 mb-2">Cadastro realizado com sucesso!</div>
+            <div className="text-lg text-green-200">Boa sorte! 🍀</div>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="nome" className="block text-sm font-bold text-white mb-3 uppercase tracking-wider text-lg">
+              👤 Nome Completo *
+            </label>
+            <input
+              type="text"
+              id="nome"
+              name="nome"
+              value={formData.nome}
+              onChange={handleChange}
+              disabled={!sorteioAberto || loading}
+              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-gray-300 focus:outline-none focus:ring-4 transition-all duration-300 ${
+                errors.nome 
+                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-500/20' 
+                  : 'border-white/30 focus:border-white/60 focus:ring-white/30 bg-white/10'
+              } ${
+                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-gray-500/20'
+              }`}
+              placeholder="Seu nome completo"
+            />
+            {errors.nome && (
+              <p className="mt-2 text-sm text-red-300 flex items-center gap-2 font-semibold">
+                <span>⚠️</span> {errors.nome}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="cpf" className="block text-sm font-bold text-white mb-3 uppercase tracking-wider text-lg">
+              🆔 CPF *
+            </label>
+            <input
+              type="text"
+              id="cpf"
+              name="cpf"
+              value={formData.cpf}
+              onChange={handleChange}
+              disabled={!sorteioAberto || loading}
+              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-gray-300 focus:outline-none focus:ring-4 transition-all duration-300 ${
+                errors.cpf 
+                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-500/20' 
+                  : 'border-white/30 focus:border-white/60 focus:ring-white/30 bg-white/10'
+              } ${
+                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-gray-500/20'
+              }`}
+              placeholder="000.000.000-00"
+              maxLength={14}
+            />
+            {cpfValidando && (
+              <p className="mt-2 text-sm text-blue-300 flex items-center gap-2 font-semibold">
+                <span className="animate-spin">⏳</span> Verificando CPF...
+              </p>
+            )}
+            {errors.cpf && (
+              <p className="mt-2 text-sm text-red-300 flex items-center gap-2 font-semibold">
+                <span>⚠️</span> {errors.cpf}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-bold text-white mb-3 uppercase tracking-wider text-lg">
+              📧 Email *
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              disabled={!sorteioAberto || loading}
+              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-gray-300 focus:outline-none focus:ring-4 transition-all duration-300 ${
+                errors.email 
+                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-500/20' 
+                  : 'border-white/30 focus:border-white/60 focus:ring-white/30 bg-white/10'
+              } ${
+                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-gray-500/20'
+              }`}
+              placeholder="seu@email.com"
+            />
+            {errors.email && (
+              <p className="mt-2 text-sm text-red-300 flex items-center gap-2 font-semibold">
+                <span>⚠️</span> {errors.email}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="chavePix" className="block text-sm font-bold text-white mb-3 uppercase tracking-wider text-lg">
+              💳 Chave Pix *
+            </label>
+            <input
+              type="text"
+              id="chavePix"
+              name="chavePix"
+              value={formData.chavePix}
+              onChange={handleChange}
+              disabled={!sorteioAberto || loading}
+              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-gray-300 focus:outline-none focus:ring-4 transition-all duration-300 ${
+                errors.chavePix 
+                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-500/20' 
+                  : 'border-white/30 focus:border-white/60 focus:ring-white/30 bg-white/10'
+              } ${
+                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-gray-500/20'
+              }`}
+              placeholder="CPF, Email, Telefone ou Chave Aleatória"
+            />
+            {errors.chavePix && (
+              <p className="mt-2 text-sm text-red-300 flex items-center gap-2 font-semibold">
+                <span>⚠️</span> {errors.chavePix}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="idUsuario" className="block text-sm font-bold text-white mb-3 uppercase tracking-wider text-lg">
+              🆔 ID do Usuário *
+            </label>
+            <input
+              type="text"
+              id="idUsuario"
+              name="idUsuario"
+              value={formData.idUsuario}
+              onChange={handleChange}
+              disabled={!sorteioAberto || loading}
+              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-gray-300 focus:outline-none focus:ring-4 transition-all duration-300 ${
+                errors.idUsuario 
+                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-500/20' 
+                  : 'border-white/30 focus:border-white/60 focus:ring-white/30 bg-white/10'
+              } ${
+                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-gray-500/20'
+              }`}
+              placeholder="Seu ID na plataforma"
+            />
+            {errors.idUsuario && (
+              <p className="mt-2 text-sm text-red-300 flex items-center gap-2 font-semibold">
+                <span>⚠️</span> {errors.idUsuario}
+              </p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={!sorteioAberto || loading}
+            className="w-full py-5 px-8 button-gradient text-white font-black text-xl rounded-2xl shadow-2xl uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+          >
+            {loading ? '⏳ Cadastrando...' : '💰 Participar da Gorjeta'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}

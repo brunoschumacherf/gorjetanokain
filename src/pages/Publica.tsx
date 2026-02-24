@@ -1,0 +1,64 @@
+import { FormularioCadastro } from '../components/FormularioCadastro';
+import { FooterLinks } from '../components/Sidebar';
+import { useSorteio } from '../contexts/SorteioContext';
+
+export function Publica() {
+  const { sorteio, totalParticipantes } = useSorteio();
+
+  return (
+    <div className="min-h-screen relative">
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center mb-12 animate-float">
+          <div className="inline-block mb-6">
+            <h1 className="text-6xl md:text-8xl font-black mb-4 shimmer-text leading-tight">
+              💰 Gorjeta do Nokain
+            </h1>
+            <div className="h-2 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-full mx-auto max-w-md animate-pulse"></div>
+          </div>
+          <p className="text-2xl md:text-3xl text-white font-semibold mb-8 drop-shadow-lg">
+            Participe e concorra a gorjetas incríveis! 🎁
+          </p>
+          
+          {sorteio && sorteio.aberto && (
+            <div className="inline-flex flex-col items-center glass-strong rounded-3xl p-8 shadow-2xl glow mb-8 card-hover">
+              <span className="text-7xl font-black text-gradient mb-3">
+                {totalParticipantes}
+              </span>
+              <span className="text-xl font-bold text-white uppercase tracking-wider">
+                Participantes Cadastrados
+              </span>
+              <div className="mt-4 flex gap-2">
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-green-300 font-semibold">Aberto para cadastros</span>
+              </div>
+            </div>
+          )}
+
+          {(!sorteio || !sorteio.aberto) && (
+            <div className="inline-block glass rounded-2xl p-6 mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
+                <span className="text-white font-semibold text-lg">Cadastros temporariamente fechados</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <FormularioCadastro />
+
+        <div className="text-center mt-16">
+          <div className="glass rounded-3xl p-8 max-w-2xl mx-auto">
+            <p className="text-3xl font-black text-gradient mb-4">
+              ✨ Boa sorte! ✨
+            </p>
+            <p className="text-xl text-white font-medium">
+              Acompanhe nossas lives para mais oportunidades de ganhar gorjetas!
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <FooterLinks />
+    </div>
+  );
+}

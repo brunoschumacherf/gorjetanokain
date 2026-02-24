@@ -179,3 +179,4 @@ Este projeto foi desenvolvido para uso em sistemas de sorteio de gorjetas.
 
 Desenvolvido com ❤️ para lives e streams
 # gorjetankain
+# gorjetankain
