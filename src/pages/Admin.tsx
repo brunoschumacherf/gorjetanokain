@@ -56,12 +56,12 @@ export function Admin() {
 
   if (!autenticado) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-blue-100 to-white p-4">
-        <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border-4 border-blue-500">
-          <h1 className="text-4xl font-black text-center mb-8 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">🔒 Acesso Administrativo</h1>
+      <div className="min-h-screen flex items-center justify-center p-4 relative">
+        <div className="glass-strong rounded-3xl p-10 max-w-md w-full shadow-2xl glow">
+          <h1 className="text-5xl font-black text-center mb-10 text-white">🔒 Acesso Administrativo</h1>
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label htmlFor="usuario" className="block text-sm font-bold text-blue-700 mb-2 uppercase">
+              <label htmlFor="usuario" className="block text-sm font-bold text-white mb-3 uppercase tracking-wider text-lg">
                 Usuário
               </label>
               <input
@@ -73,12 +73,12 @@ export function Admin() {
                   setErro('');
                 }}
                 placeholder="Digite o usuário (opcional)"
-                className="w-full px-4 py-3 rounded-xl bg-blue-50 border-2 border-blue-300 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="w-full px-5 py-4 rounded-2xl bg-white/10 border-2 border-white/30 text-white placeholder-gray-300 focus:outline-none focus:ring-4 focus:ring-white/30 focus:border-white/60 transition-all"
                 autoFocus
               />
             </div>
             <div>
-              <label htmlFor="senha" className="block text-sm font-bold text-blue-700 mb-2 uppercase">
+              <label htmlFor="senha" className="block text-sm font-bold text-white mb-3 uppercase tracking-wider text-lg">
                 Senha do Administrador
               </label>
               <input
@@ -90,18 +90,18 @@ export function Admin() {
                   setErro('');
                 }}
                 placeholder="Digite a senha"
-                className="w-full px-4 py-3 rounded-xl bg-blue-50 border-2 border-blue-300 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="w-full px-5 py-4 rounded-2xl bg-white/10 border-2 border-white/30 text-white placeholder-gray-300 focus:outline-none focus:ring-4 focus:ring-white/30 focus:border-white/60 transition-all"
               />
-              {erro && <p className="mt-2 text-sm text-red-600">{erro}</p>}
+              {erro && <p className="mt-3 text-sm text-red-300 font-semibold">{erro}</p>}
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-800 text-white font-black text-lg rounded-xl shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-5 px-8 button-gradient text-white font-black text-lg rounded-2xl shadow-2xl uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Verificando...' : 'Entrar'}
             </button>
-            <p className="text-center text-sm text-blue-600">
+            <p className="text-center text-sm text-white/80 font-medium">
               💡 Use: usuário "nokain" e senha "nokaingay"
             </p>
           </form>
@@ -111,12 +111,12 @@ export function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-white">
-      <div className="bg-white/80 backdrop-blur-md border-b-4 border-blue-500 p-4 flex justify-between items-center shadow-lg">
-        <h2 className="text-2xl font-black bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Painel Administrativo</h2>
+    <div className="min-h-screen relative">
+      <div className="glass-strong border-b-4 border-white/30 p-6 flex justify-between items-center shadow-xl">
+        <h2 className="text-3xl font-black text-white">Painel Administrativo</h2>
         <button
           onClick={handleLogout}
-          className="px-6 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-xl hover:scale-105 transition-all duration-300"
+          className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-2xl hover:scale-105 transition-all duration-300 shadow-xl glow-hover"
         >
           Sair
         </button>

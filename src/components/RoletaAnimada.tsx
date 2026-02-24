@@ -9,14 +9,14 @@ interface RoletaAnimadaProps {
 }
 
 const CORES_BLUE = [
-  { r: 59, g: 130, b: 246 },
+  { r: 30, g: 58, b: 138 },
+  { r: 30, g: 64, b: 175 },
   { r: 37, g: 99, b: 235 },
-  { r: 96, g: 165, b: 250 },
   { r: 29, g: 78, b: 216 },
-  { r: 14, g: 165, b: 233 },
-  { r: 2, g: 132, b: 199 },
-  { r: 99, g: 102, b: 241 },
-  { r: 79, g: 70, b: 229 },
+  { r: 30, g: 58, b: 138 },
+  { r: 30, g: 64, b: 175 },
+  { r: 37, g: 99, b: 235 },
+  { r: 29, g: 78, b: 216 },
 ];
 
 export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorteio, vencedorId }: RoletaAnimadaProps) {
@@ -152,10 +152,10 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
   if (participantes.length === 0) {
     return (
       <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-white rounded-3xl p-12 text-center border-4 border-blue-500 shadow-2xl">
-          <div className="text-6xl mb-4">🎰</div>
-          <div className="text-2xl font-bold text-blue-700 mb-2">Nenhum participante cadastrado</div>
-          <div className="text-blue-600">Cadastre participantes para iniciar o sorteio</div>
+        <div className="glass-strong rounded-3xl p-12 text-center shadow-2xl glow">
+          <div className="text-6xl mb-4 animate-float">🎰</div>
+          <div className="text-2xl font-bold text-white mb-2">Nenhum participante cadastrado</div>
+          <div className="text-white/80">Cadastre participantes para iniciar a gorjeta</div>
         </div>
       </div>
     );
@@ -163,18 +163,19 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-3xl p-8 shadow-2xl border-4 border-blue-500 relative overflow-hidden">
+      <div className="glass-strong rounded-3xl p-8 shadow-2xl border-4 border-white/40 relative overflow-hidden glow">
         {(sorteando || mostrandoResultado) && (
-          <div className="absolute inset-0 pointer-events-none">
-            {[...Array(30)].map((_, i) => (
+          <div className="absolute inset-0 pointer-events-none z-10">
+            {[...Array(40)].map((_, i) => (
               <div
                 key={i}
-                className="absolute w-3 h-3 bg-blue-400 rounded-full animate-ping"
+                className="absolute w-4 h-4 rounded-full animate-ping"
                 style={{
                   left: `${Math.random() * 100}%`,
                   top: `${Math.random() * 100}%`,
                   animationDelay: `${Math.random() * 2}s`,
-                  animationDuration: `${1 + Math.random()}s`
+                  animationDuration: `${1 + Math.random()}s`,
+                  background: `rgba(59, 130, 246, ${0.6 + Math.random() * 0.4})`
                 }}
               />
             ))}
@@ -183,12 +184,12 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
 
         <div className="relative">
           {vencedor && !sorteando && !mostrandoResultado && (
-            <div className="absolute top-4 left-4 z-30 bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-4 shadow-2xl max-w-xs">
-              <div className="text-3xl mb-2 animate-bounce text-center">🏆</div>
-              <div className="text-xl font-black text-white mb-2 text-center">VENCEDOR!</div>
-              <div className="bg-white/20 backdrop-blur-md rounded-xl p-3">
-                <div className="text-lg font-bold text-white mb-2 text-center">{vencedor.nome}</div>
-                <div className="space-y-1 text-sm text-white/90">
+            <div className="absolute top-4 left-4 z-30 glass-strong rounded-2xl p-5 shadow-2xl max-w-xs glow animate-float">
+              <div className="text-4xl mb-3 animate-bounce text-center">🏆</div>
+              <div className="text-xl font-black text-white mb-3 text-center">VENCEDOR!</div>
+              <div className="glass rounded-xl p-4 border-2 border-white/30">
+                <div className="text-lg font-bold text-white mb-3 text-center">{vencedor.nome}</div>
+                <div className="space-y-2 text-sm text-white/90">
                   <p>📧 {vencedor.email}</p>
                   <p>🆔 {vencedor.idUsuario}</p>
                   <p>💳 {vencedor.chavePix}</p>
@@ -198,10 +199,10 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
           )}
 
           {mostrandoResultado && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-blue-900/90 rounded-3xl backdrop-blur-sm">
+            <div className="absolute inset-0 z-20 flex items-center justify-center glass-strong rounded-3xl backdrop-blur-md">
               <div className="text-center">
-                <div className="text-8xl mb-4 animate-bounce">🎯</div>
-                <div className="text-3xl font-black text-white">Verificando resultado...</div>
+                <div className="text-8xl mb-6 animate-bounce">🎯</div>
+                <div className="text-4xl font-black text-white">Verificando resultado...</div>
               </div>
             </div>
           )}
@@ -244,15 +245,15 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
               })}
             </div>
 
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 w-40 h-40 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full border-8 border-white shadow-2xl flex items-center justify-center">
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 w-44 h-44 bg-gradient-to-br from-blue-900 to-blue-800 rounded-full border-8 border-white/90 shadow-2xl flex items-center justify-center glow">
               {sorteando ? (
-                <div className="text-6xl animate-spin">🎰</div>
+                <div className="text-7xl animate-spin">🎰</div>
               ) : mostrandoResultado ? (
-                <div className="text-6xl animate-pulse">🎯</div>
+                <div className="text-7xl animate-pulse">🎯</div>
               ) : (
                 <div className="text-center text-white">
-                  <div className="text-3xl font-black">{participantes.length}</div>
-                  <div className="text-xs font-semibold">PARTICIPANTES</div>
+                  <div className="text-4xl font-black">{participantes.length}</div>
+                  <div className="text-xs font-semibold uppercase tracking-wider">Participantes</div>
                 </div>
               )}
             </div>
@@ -266,9 +267,9 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
           <button
             onClick={iniciarSorteio}
             disabled={sorteando || participantes.length === 0 || mostrandoResultado}
-            className="px-12 py-4 bg-gradient-to-r from-blue-600 to-blue-800 text-white font-black text-2xl rounded-2xl shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 uppercase tracking-wider"
+            className="px-12 py-5 button-gradient text-white font-black text-2xl rounded-2xl shadow-2xl glow-hover card-hover disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none uppercase tracking-wider"
           >
-            {sorteando ? '🎰 Sorteando...' : mostrandoResultado ? '⏳ Processando...' : vencedor ? '🎲 Sortear Novamente' : '🎲 Sortear Agora!'}
+            {sorteando ? '🎰 Sorteando...' : mostrandoResultado ? '⏳ Processando...' : vencedor ? '🎲 Sortear Novamente' : '💰 Sortear Gorjeta!'}
           </button>
         </div>
       </div>

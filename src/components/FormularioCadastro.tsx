@@ -182,7 +182,7 @@ export function FormularioCadastro() {
     <div className="max-w-3xl mx-auto">
       <div className="glass-strong rounded-3xl p-10 shadow-2xl glow card-hover">
         <div className="text-center mb-10">
-          <h2 className="text-5xl font-black mb-4 shimmer-text">🎯 Cadastre-se Agora!</h2>
+          <h2 className="text-5xl font-black mb-4 text-white">🎯 Cadastre-se Agora!</h2>
           {!sorteioAberto && (
             <div className="glass rounded-2xl p-5 text-white font-semibold text-lg border-2 border-red-400/50">
               ⚠️ Cadastros temporariamente fechados

@@ -9,7 +9,7 @@ export function FooterLinks() {
   return (
     <footer className="glass-strong border-t-4 border-white/30 py-12 mt-16 relative">
       <div className="container mx-auto px-4">
-        <h3 className="text-3xl font-black text-center mb-8 shimmer-text">Siga-nos nas redes sociais</h3>
+        <h3 className="text-3xl font-black text-center mb-8 text-white">Siga-nos nas redes sociais</h3>
         <div className="flex flex-wrap justify-center gap-6">
           {links.map((link) => (
             <a
