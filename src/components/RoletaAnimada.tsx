@@ -26,8 +26,7 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
   const [sorteando, setSorteando] = useState(false);
   const [vencedorAtual, setVencedorAtual] = useState<Participante | null>(null);
   const [rotacao, setRotacao] = useState(0);
-  const [velocidade, setVelocidade] = useState(0);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | undefined>(undefined);
 
   const iniciarSorteio = async () => {
     if (participantes.length === 0) {
@@ -38,7 +37,6 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
     setSorteando(true);
     setVencedorAtual(null);
     setRotacao(0);
-    setVelocidade(5);
 
     let vencedorIdBackend: string | null = null;
     try {
@@ -93,39 +91,28 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
       const totalDuration = acelerarDuration + velocidadeMaximaDuration + desacelerarDuration;
 
       if (elapsedTime < acelerarDuration) {
-        // Acelerando
         const progresso = elapsedTime / acelerarDuration;
         currentVelocidade = 5 + (20 * progresso);
         currentRotacao += currentVelocidade;
-        setVelocidade(currentVelocidade);
         setRotacao(currentRotacao);
       } else if (elapsedTime < acelerarDuration + velocidadeMaximaDuration) {
-        // Velocidade máxima constante
         currentVelocidade = 25;
         currentRotacao += currentVelocidade;
-        setVelocidade(25);
         setRotacao(currentRotacao);
       } else if (elapsedTime < totalDuration) {
-        // Desacelerando gradualmente até parar no vencedor
         const progressoDesaceleracao = (elapsedTime - acelerarDuration - velocidadeMaximaDuration) / desacelerarDuration;
         const rotacaoRestante = rotacaoFinal - currentRotacao;
         
-        // Easing out quartic (parada mais suave e gradual)
         const easing = 1 - Math.pow(1 - progressoDesaceleracao, 4);
-        
-        // Calcular nova rotação baseada no easing, garantindo que chegue exatamente no vencedor
         const novaRotacao = currentRotacao + (rotacaoRestante * easing * 0.15);
         currentRotacao = novaRotacao;
         
-        // Velocidade diminui gradualmente de forma mais suave
         const velocidadeEasing = Math.pow(1 - progressoDesaceleracao, 3);
         currentVelocidade = 25 * velocidadeEasing;
         
         setRotacao(currentRotacao);
-        setVelocidade(currentVelocidade);
       } else {
         setRotacao(rotacaoFinal);
-        setVelocidade(0);
         setSorteando(false);
         setVencedorAtual(vencedor);
         onSorteioCompleto(vencedor);
@@ -240,7 +227,6 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
                         justifyContent: 'center',
                         textAlign: 'center',
                         WebkitTextStroke: '1.5px rgba(255,255,255,0.95)',
-                        textStroke: '1.5px rgba(255,255,255,0.95)',
                         transform: 'rotate(90deg)',
                         maxWidth: '160px',
                         textShadow: '2px 2px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6)'
