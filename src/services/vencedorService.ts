@@ -5,6 +5,7 @@ import {
   setDoc, 
   query,
   orderBy,
+  writeBatch,
   Timestamp 
 } from 'firebase/firestore';
 import { firestore } from '../config/firebase';
@@ -88,4 +89,16 @@ export async function getTotalVencedores(): Promise<number> {
   const vencedoresRef = collection(firestore, VENCEDORES_COLLECTION);
   const querySnapshot = await getDocs(vencedoresRef);
   return querySnapshot.size;
+}
+
+export async function limparVencedores(): Promise<void> {
+  const vencedoresRef = collection(firestore, VENCEDORES_COLLECTION);
+  const querySnapshot = await getDocs(vencedoresRef);
+  const batch = writeBatch(firestore);
+  
+  querySnapshot.docs.forEach((doc) => {
+    batch.delete(doc.ref);
+  });
+  
+  await batch.commit();
 }

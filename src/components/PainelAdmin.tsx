@@ -9,6 +9,8 @@ export function PainelAdmin() {
     participantes,
     totalParticipantes,
     vencedor,
+    vencedoresAcumulados,
+    totalVencedores,
     loading,
     criarNovoSorteio,
     abrirSorteioAtual,
@@ -16,7 +18,8 @@ export function PainelAdmin() {
     executarSorteioAtual,
     resetarSorteioAtual,
     carregarParticipantes,
-    carregarSorteio
+    carregarSorteio,
+    carregarVencedores
   } = useSorteio();
 
   const handleExecutarSorteio = async (): Promise<string | null> => {
@@ -43,6 +46,7 @@ export function PainelAdmin() {
   const handleSorteioCompleto = async (_vencedor: Participante) => {
     await carregarSorteio();
     await carregarParticipantes();
+    await carregarVencedores();
   };
 
   const handleAcaoComConfirmacao = async (acao: () => Promise<void>, mensagem: string) => {
@@ -74,7 +78,7 @@ export function PainelAdmin() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
         <div className="glass-strong rounded-3xl p-8 text-center shadow-2xl glow card-hover">
           <div className="text-6xl font-black text-gradient mb-3">{totalParticipantes}</div>
           <div className="text-xl font-semibold text-white uppercase tracking-wider">Participantes</div>
@@ -82,6 +86,10 @@ export function PainelAdmin() {
         <div className="glass-strong rounded-3xl p-8 text-center shadow-2xl glow card-hover">
           <div className="text-4xl font-black text-gradient mb-3">{statusInfo.label}</div>
           <div className="text-xl font-semibold text-white uppercase tracking-wider">Status</div>
+        </div>
+        <div className="glass-strong rounded-3xl p-8 text-center shadow-2xl glow card-hover">
+          <div className="text-6xl font-black text-gradient mb-3">{totalVencedores}</div>
+          <div className="text-xl font-semibold text-white uppercase tracking-wider">Vencedores Acumulados</div>
         </div>
       </div>
 
@@ -193,6 +201,41 @@ export function PainelAdmin() {
               <p className="text-xl"><strong className="text-white font-bold">Email:</strong> <span className="text-white/90">{vencedor.email}</span></p>
               <p className="text-xl"><strong className="text-white font-bold">Chave Pix:</strong> <span className="text-white/90">{vencedor.chavePix}</span></p>
               <p className="text-xl"><strong className="text-white font-bold">ID Usuário:</strong> <span className="text-white/90">{vencedor.idUsuario}</span></p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {vencedoresAcumulados.length > 0 && (
+        <div className="mb-10">
+          <h2 className="text-4xl font-black mb-8 text-white">🏆 Histórico de Vencedores ({vencedoresAcumulados.length})</h2>
+          <div className="glass-strong rounded-3xl p-8 shadow-2xl glow">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {vencedoresAcumulados.map((vencedorItem, index) => (
+                <div key={vencedorItem.id} className="glass rounded-2xl p-6 border-2 border-yellow-400/50 hover:border-yellow-400 transition-all shadow-xl card-hover">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-lg font-bold text-yellow-300">#{vencedoresAcumulados.length - index}</span>
+                    <span className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 px-3 py-1 rounded-lg text-xs font-black uppercase">
+                      🏆 VENCEDOR
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-xl font-bold text-white">{vencedorItem.participante.nome}</p>
+                    <p className="text-sm text-white/80">CPF: {formatCPF(vencedorItem.participante.cpf)}</p>
+                    <p className="text-sm text-white/80">Email: {vencedorItem.participante.email}</p>
+                    <p className="text-sm text-white/80">ID: {vencedorItem.participante.idUsuario}</p>
+                    <p className="text-xs text-white/60 mt-3">
+                      {vencedorItem.dataSorteio.toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

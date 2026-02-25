@@ -121,6 +121,8 @@ export function SorteioProvider({ children }: { children: ReactNode }) {
       await encerrarSorteio(sorteio.id);
       await carregarSorteio();
       await carregarParticipantes();
+      await carregarVencedores();
+      setVencedor(null);
     } catch (error) {
       console.error('Erro ao encerrar sorteio:', error);
       throw error;
@@ -156,6 +158,7 @@ export function SorteioProvider({ children }: { children: ReactNode }) {
       await resetarSorteio();
       await carregarSorteio();
       await carregarParticipantes();
+      await carregarVencedores();
       setVencedor(null);
     } catch (error) {
       console.error('Erro ao resetar sorteio:', error);

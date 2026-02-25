@@ -9,7 +9,7 @@ import {
 } from 'firebase/firestore';
 import { firestore } from '../config/firebase';
 import type { Sorteio } from '../types';
-import { salvarVencedor } from './vencedorService';
+import { salvarVencedor, limparVencedores } from './vencedorService';
 
 const SORTEIO_COLLECTION = 'sorteio';
 const PARTICIPANTES_COLLECTION = 'paricipantes';
@@ -100,6 +100,8 @@ export async function encerrarSorteio(sorteioId: string): Promise<void> {
   });
   
   await batch.commit();
+  
+  await limparVencedores();
 }
 
 export async function executarSorteio(sorteioId: string): Promise<string | null> {
@@ -118,9 +120,12 @@ export async function executarSorteio(sorteioId: string): Promise<string | null>
   // Salvar vencedor na coleção de vencedores (acumular histórico)
   try {
     await salvarVencedor(vencedorId, sorteioId);
-  } catch (error) {
-    console.error('Erro ao salvar vencedor:', error);
+  } catch (error: any) {
+    console.error('Erro ao salvar vencedor no histórico:', error);
     // Continua mesmo se houver erro ao salvar o histórico
+    if (error.code === 'permission-denied') {
+      console.error('Erro de permissão: Verifique as regras do Firestore para a coleção "vencedores"');
+    }
   }
   
   // Atualizar sorteio com o vencedor
