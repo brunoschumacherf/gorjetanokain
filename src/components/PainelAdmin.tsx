@@ -143,16 +143,16 @@ export function PainelAdmin() {
         </div>
       </div>
 
-      <aside className="w-80 md:w-96 shrink-0 flex flex-col rounded-l-2xl border-l-2 border-white/40 p-4 overflow-hidden bg-slate-900/80 backdrop-blur-xl shadow-2xl shadow-black/30">
-        <h2 className="text-lg font-black text-white mb-3 shrink-0">📋 Participantes ({participantes.length})</h2>
-        <div className="flex-1 min-h-0 overflow-y-auto space-y-2 scroll-panel pr-1">
+      <aside className="w-[22rem] md:w-[26rem] shrink-0 flex flex-col rounded-l-2xl border-l-2 border-white/40 p-5 overflow-hidden bg-slate-900/80 backdrop-blur-xl shadow-2xl shadow-black/30">
+        <h2 className="text-xl font-black text-white mb-4 shrink-0">📋 Participantes ({participantes.length})</h2>
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-3 scroll-panel pr-1">
           {participantes.length === 0 ? (
             <p className="text-white/70 text-sm">Nenhum participante.</p>
           ) : (
             participantes.map((p) => (
-              <div key={p.id} className="glass rounded-xl p-3 border border-white/20 flex flex-col gap-0.5">
-                <span className="text-white font-semibold truncate text-sm">{p.nome}</span>
-                <span className="text-white/70 font-mono text-xs truncate">{p.chavePix}</span>
+              <div key={p.id} className="glass rounded-xl p-4 border border-white/20 flex flex-col gap-1">
+                <p className="text-white font-semibold truncate text-base"><span className="text-amber-300/90 text-sm font-medium">Nome:</span> {p.nome}</p>
+                <p className="text-white/70 font-mono text-sm truncate"><span className="text-amber-300/90 font-sans font-medium text-sm">Chave Pix:</span> {p.chavePix}</p>
               </div>
             ))
           )}
@@ -167,14 +167,19 @@ export function PainelAdmin() {
           <div className="overflow-x-auto scroll-panel">
             <div className="flex gap-4 pb-2 min-w-0">
               {vencedoresAcumulados.map((vencedorItem, index) => (
-                <div key={vencedorItem.id} className="bg-slate-800/90 rounded-2xl p-4 border-2 border-amber-400/70 shrink-0 w-56 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-500/20 transition-all">
-                  <div className="flex items-center justify-between mb-2">
+                <div key={vencedorItem.id} className="bg-slate-800/90 rounded-2xl p-5 border-2 border-amber-400/70 shrink-0 w-72 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-500/20 transition-all">
+                  <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-bold text-amber-300">#{vencedoresAcumulados.length - index}</span>
                     <span className="bg-amber-400 text-slate-900 px-2 py-0.5 rounded font-black text-xs uppercase">🏆</span>
                   </div>
-                  <p className="font-bold text-white">{vencedorItem.participante.nome}</p>
-                  <p className="text-xs text-slate-300">CPF: {formatCPF(vencedorItem.participante.cpf)} · ID: {vencedorItem.participante.idUsuario}</p>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="font-bold text-white text-lg mb-2">{vencedorItem.participante.nome}</p>
+                  <div className="space-y-1 text-sm text-slate-300">
+                    <p>CPF: {formatCPF(vencedorItem.participante.cpf)}</p>
+                    <p>Email: {vencedorItem.participante.email}</p>
+                    <p>Chave Pix: <span className="font-mono">{vencedorItem.participante.chavePix}</span></p>
+                    <p>ID: {vencedorItem.participante.idUsuario}</p>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-3">
                     {vencedorItem.dataSorteio.toLocaleDateString('pt-BR', {
                       day: '2-digit',
                       month: '2-digit',
