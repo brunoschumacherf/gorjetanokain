@@ -399,7 +399,7 @@ export function FormularioCadastro() {
 
           <div>
             <label className="block text-sm font-bold text-white mb-3 uppercase tracking-wider text-lg">
-              📷 Print da conta (opcional)
+              📷 Print da conta
             </label>
             <label className="flex items-center gap-3 px-5 py-4 rounded-2xl border-2 border-amber-400/50 bg-slate-700/60 text-white cursor-pointer hover:bg-slate-600/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full">
               <input
