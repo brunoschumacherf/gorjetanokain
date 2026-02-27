@@ -179,6 +179,16 @@ export function PainelAdmin() {
                     <p>Chave Pix: <span className="font-mono">{vencedorItem.participante.chavePix}</span></p>
                     <p>ID: {vencedorItem.participante.idUsuario}</p>
                   </div>
+                  {vencedorItem.participante.fotoContaUrl && (
+                    <a
+                      href={vencedorItem.participante.fotoContaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 mt-2 text-sm font-semibold text-amber-400 hover:text-amber-300 underline"
+                    >
+                      📷 Ver print da conta
+                    </a>
+                  )}
                   <p className="text-xs text-slate-400 mt-3">
                     {vencedorItem.dataSorteio.toLocaleDateString('pt-BR', {
                       day: '2-digit',

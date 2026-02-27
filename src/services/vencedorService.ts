@@ -34,6 +34,7 @@ export async function salvarVencedor(
     participanteEmail: participante.email,
     participanteChavePix: participante.chavePix,
     participanteIdUsuario: participante.idUsuario,
+    participanteFotoConta: participante.fotoContaUrl || '',
     sorteioId: sorteioId,
     dataSorteio: Timestamp.now()
   });
@@ -70,7 +71,8 @@ export async function listarVencedores(): Promise<Vencedor[]> {
         email: data.participanteEmail || '',
         chavePix: data.participanteChavePix || '',
         idUsuario: data.participanteIdUsuario || '',
-        dataCadastro: new Date()
+        dataCadastro: new Date(),
+        fotoContaUrl: data.participanteFotoConta || ''
       };
       
       vencedores.push({

@@ -59,6 +59,7 @@ export async function cadastrarParticipante(
     email: dados.email,
     chave_pix: dados.chavePix,
     id: dados.idUsuario,
+    foto_conta: dados.fotoContaUrl || '',
     dataCadastro: Timestamp.now()
   });
   
@@ -93,9 +94,10 @@ export async function listarParticipantes(): Promise<Participante[]> {
       nome: data.nome || '',
       cpf: data.cpf || '',
       email: data.email || '',
-      chavePix: data.chave_pix || data.chavePix || '', // Suporta ambos os formatos
-      idUsuario: data.id || data.idUsuario || '', // Suporta ambos os formatos
-      dataCadastro: data.dataCadastro?.toDate() || new Date()
+      chavePix: data.chave_pix || data.chavePix || '',
+      idUsuario: data.id || data.idUsuario || '',
+      dataCadastro: data.dataCadastro?.toDate() || new Date(),
+      fotoContaUrl: data.foto_conta || ''
     };
   });
 }
@@ -111,9 +113,10 @@ export async function buscarParticipantePorId(id: string): Promise<Participante 
       nome: data.nome || '',
       cpf: data.cpf || '',
       email: data.email || '',
-      chavePix: data.chave_pix || data.chavePix || '', // Suporta ambos os formatos
-      idUsuario: data.id || data.idUsuario || '', // Suporta ambos os formatos
-      dataCadastro: data.dataCadastro?.toDate() || new Date()
+      chavePix: data.chave_pix || data.chavePix || '',
+      idUsuario: data.id || data.idUsuario || '',
+      dataCadastro: data.dataCadastro?.toDate() || new Date(),
+      fotoContaUrl: data.foto_conta || ''
     };
   }
   
@@ -132,7 +135,8 @@ export async function buscarParticipantePorId(id: string): Promise<Participante 
       email: data.email || '',
       chavePix: data.chave_pix || data.chavePix || '',
       idUsuario: data.id || data.idUsuario || '',
-      dataCadastro: data.dataCadastro?.toDate() || new Date()
+      dataCadastro: data.dataCadastro?.toDate() || new Date(),
+      fotoContaUrl: data.foto_conta || ''
     };
   }
   

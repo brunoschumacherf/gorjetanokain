@@ -1,11 +1,12 @@
 export interface Participante {
   id: string;
   nome: string;
-  cpf: string; // CPF será usado como ID do documento para garantir unicidade
+  cpf: string;
   email: string;
   chavePix: string;
   idUsuario: string;
   dataCadastro: Date;
+  fotoContaUrl?: string;
 }
 
 export interface Sorteio {

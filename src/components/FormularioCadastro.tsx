@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { cadastrarParticipante, cpfJaCadastrado, idJaCadastrado } from '../services/participanteService';
+import { compressImageAsDataUrl } from '../utils/imageCompress';
 import { isValidCPF, formatCPF, cleanCPF } from '../utils/cpfValidator';
 import { useSorteio } from '../contexts/SorteioContext';
 
@@ -17,6 +18,8 @@ export function FormularioCadastro() {
   const [success, setSuccess] = useState(false);
   const [cpfValidando, setCpfValidando] = useState(false);
   const [idValidando, setIdValidando] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -182,7 +185,8 @@ export function FormularioCadastro() {
         cpf: cpfLimpo,
         email: formData.email.trim(),
         chavePix: formData.chavePix.trim(),
-        idUsuario: formData.idUsuario.trim()
+        idUsuario: formData.idUsuario.trim(),
+        fotoContaUrl: uploadedImageUrl || undefined
       });
 
       setSuccess(true);
@@ -193,6 +197,7 @@ export function FormularioCadastro() {
         chavePix: '',
         idUsuario: ''
       });
+      setUploadedImageUrl('');
       setErrors({});
       
       try {
@@ -390,6 +395,39 @@ export function FormularioCadastro() {
                 <span>⚠️</span> {errors.idUsuario}
               </p>
             )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-white mb-3 uppercase tracking-wider text-lg">
+              📷 Print da conta (opcional)
+            </label>
+            <label className="flex items-center gap-3 px-5 py-4 rounded-2xl border-2 border-amber-400/50 bg-slate-700/60 text-white cursor-pointer hover:bg-slate-600/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full">
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                disabled={!sorteioAberto || loading || uploadingImage}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setUploadingImage(true);
+                  try {
+                    const dataUrl = await compressImageAsDataUrl(file);
+                    setUploadedImageUrl(dataUrl);
+                  } catch (err) {
+                    console.error('Erro ao processar imagem:', err);
+                    alert('Erro ao processar imagem. Tente outra imagem.');
+                  } finally {
+                    setUploadingImage(false);
+                    e.target.value = '';
+                  }
+                }}
+              />
+              {uploadingImage ? '⏳ Enviando...' : '📤 Enviar imagem'}
+              {uploadedImageUrl && (
+                <span className="text-sm text-emerald-300">✓ Imagem enviada</span>
+              )}
+            </label>
           </div>
 
           <button
