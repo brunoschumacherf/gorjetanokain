@@ -139,8 +139,10 @@ export function SorteioProvider({ children }: { children: ReactNode }) {
       if (vencedorId) {
         const vencedorData = await buscarParticipantePorId(vencedorId);
         setVencedor(vencedorData);
-        // Recarregar lista de vencedores acumulados
-        await carregarVencedores();
+        setLoading(false);
+        carregarVencedores().catch(console.error);
+        carregarSorteio().catch(console.error);
+        return vencedorId;
       }
       await carregarSorteio();
       return vencedorId;

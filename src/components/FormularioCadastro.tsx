@@ -227,21 +227,21 @@ export function FormularioCadastro() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="glass-strong rounded-3xl p-10 shadow-2xl glow card-hover">
+      <div className="rounded-3xl p-10 shadow-2xl bg-slate-800 border-2 border-amber-400/60 shadow-amber-900/20">
         <div className="text-center mb-10">
           <h2 className="text-5xl font-black mb-4 text-white">🎯 Cadastre-se Agora!</h2>
           {!sorteioAberto && (
-            <div className="glass rounded-2xl p-5 text-white font-semibold text-lg border-2 border-red-400/50">
+            <div className="rounded-2xl p-5 text-amber-100 font-semibold text-lg border-2 border-amber-500/60 bg-slate-700/50">
               ⚠️ Cadastros temporariamente fechados
             </div>
           )}
         </div>
 
         {success && (
-          <div className="glass rounded-2xl p-6 mb-8 text-center border-2 border-green-400/50 animate-pulse">
+          <div className="rounded-2xl p-6 mb-8 text-center border-2 border-emerald-400/70 bg-emerald-900/30 animate-pulse">
             <div className="text-4xl mb-3">✅</div>
-            <div className="text-2xl font-bold text-green-300 mb-2">Cadastro realizado com sucesso!</div>
-            <div className="text-lg text-green-200">Boa sorte! 🍀</div>
+            <div className="text-2xl font-bold text-emerald-300 mb-2">Cadastro realizado com sucesso!</div>
+            <div className="text-lg text-emerald-200">Boa sorte! 🍀</div>
           </div>
         )}
 
@@ -257,12 +257,12 @@ export function FormularioCadastro() {
               value={formData.nome}
               onChange={handleChange}
               disabled={!sorteioAberto || loading}
-              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-gray-300 focus:outline-none focus:ring-4 transition-all duration-300 ${
+              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-slate-400 focus:outline-none focus:ring-4 transition-all duration-300 ${
                 errors.nome 
-                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-500/20' 
-                  : 'border-white/30 focus:border-white/60 focus:ring-white/30 bg-white/10'
+                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-900/30' 
+                  : 'border-amber-400/50 focus:border-amber-400 focus:ring-amber-400/30 bg-slate-700/60'
               } ${
-                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-gray-500/20'
+                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-slate-700/40'
               }`}
               placeholder="Seu nome completo"
             />
@@ -284,18 +284,18 @@ export function FormularioCadastro() {
               value={formData.cpf}
               onChange={handleChange}
               disabled={!sorteioAberto || loading}
-              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-gray-300 focus:outline-none focus:ring-4 transition-all duration-300 ${
+              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-slate-400 focus:outline-none focus:ring-4 transition-all duration-300 ${
                 errors.cpf 
-                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-500/20' 
-                  : 'border-white/30 focus:border-white/60 focus:ring-white/30 bg-white/10'
+                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-900/30' 
+                  : 'border-amber-400/50 focus:border-amber-400 focus:ring-amber-400/30 bg-slate-700/60'
               } ${
-                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-gray-500/20'
+                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-slate-700/40'
               }`}
               placeholder="000.000.000-00"
               maxLength={14}
             />
             {cpfValidando && (
-              <p className="mt-2 text-sm text-blue-300 flex items-center gap-2 font-semibold">
+              <p className="mt-2 text-sm text-amber-300 flex items-center gap-2 font-semibold">
                 <span className="animate-spin">⏳</span> Verificando CPF...
               </p>
             )}
@@ -317,12 +317,12 @@ export function FormularioCadastro() {
               value={formData.email}
               onChange={handleChange}
               disabled={!sorteioAberto || loading}
-              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-gray-300 focus:outline-none focus:ring-4 transition-all duration-300 ${
+              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-slate-400 focus:outline-none focus:ring-4 transition-all duration-300 ${
                 errors.email 
-                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-500/20' 
-                  : 'border-white/30 focus:border-white/60 focus:ring-white/30 bg-white/10'
+                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-900/30' 
+                  : 'border-amber-400/50 focus:border-amber-400 focus:ring-amber-400/30 bg-slate-700/60'
               } ${
-                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-gray-500/20'
+                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-slate-700/40'
               }`}
               placeholder="seu@email.com"
             />
@@ -344,12 +344,12 @@ export function FormularioCadastro() {
               value={formData.chavePix}
               onChange={handleChange}
               disabled={!sorteioAberto || loading}
-              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-gray-300 focus:outline-none focus:ring-4 transition-all duration-300 ${
+              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-slate-400 focus:outline-none focus:ring-4 transition-all duration-300 ${
                 errors.chavePix 
-                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-500/20' 
-                  : 'border-white/30 focus:border-white/60 focus:ring-white/30 bg-white/10'
+                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-900/30' 
+                  : 'border-amber-400/50 focus:border-amber-400 focus:ring-amber-400/30 bg-slate-700/60'
               } ${
-                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-gray-500/20'
+                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-slate-700/40'
               }`}
               placeholder="CPF, Email, Telefone ou Chave Aleatória"
             />
@@ -371,17 +371,17 @@ export function FormularioCadastro() {
               value={formData.idUsuario}
               onChange={handleChange}
               disabled={!sorteioAberto || loading}
-              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-gray-300 focus:outline-none focus:ring-4 transition-all duration-300 ${
+              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-slate-400 focus:outline-none focus:ring-4 transition-all duration-300 ${
                 errors.idUsuario 
-                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-500/20' 
-                  : 'border-white/30 focus:border-white/60 focus:ring-white/30 bg-white/10'
+                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-900/30' 
+                  : 'border-amber-400/50 focus:border-amber-400 focus:ring-amber-400/30 bg-slate-700/60'
               } ${
-                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-gray-500/20'
+                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-slate-700/40'
               }`}
               placeholder="Seu ID na plataforma"
             />
             {idValidando && (
-              <p className="mt-2 text-sm text-blue-300 flex items-center gap-2 font-semibold">
+              <p className="mt-2 text-sm text-amber-300 flex items-center gap-2 font-semibold">
                 <span className="animate-spin">⏳</span> Verificando ID...
               </p>
             )}
@@ -395,7 +395,7 @@ export function FormularioCadastro() {
           <button
             type="submit"
             disabled={!sorteioAberto || loading}
-            className="w-full py-5 px-8 button-gradient text-white font-black text-xl rounded-2xl shadow-2xl uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+            className="w-full py-5 px-8 bg-amber-500 hover:bg-amber-400 text-slate-900 font-black text-xl rounded-2xl shadow-2xl shadow-amber-900/30 uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none transition-colors"
           >
             {loading ? '⏳ Cadastrando...' : '💰 Participar da Gorjeta'}
           </button>

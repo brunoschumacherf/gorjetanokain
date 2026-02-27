@@ -112,11 +112,11 @@ export function Admin() {
 
   return (
     <div className="min-h-screen relative">
-      <div className="glass-strong border-b-4 border-white/30 p-6 flex justify-between items-center shadow-xl">
+      <div className="bg-slate-900 border-b-4 border-amber-400/60 p-6 flex justify-between items-center shadow-xl">
         <h2 className="text-3xl font-black text-white">Painel Administrativo</h2>
         <button
           onClick={handleLogout}
-          className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-2xl hover:scale-105 transition-all duration-300 shadow-xl glow-hover"
+          className="px-8 py-3 bg-red-500 hover:bg-red-400 text-white font-bold rounded-2xl hover:scale-105 transition-all duration-300 shadow-lg"
         >
           Sair
         </button>

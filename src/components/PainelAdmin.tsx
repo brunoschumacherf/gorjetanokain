@@ -1,26 +1,27 @@
+import { useState, useEffect } from 'react';
 import { useSorteio } from '../contexts/SorteioContext';
-import { RoletaAnimada } from './RoletaAnimada';
-import type { Participante } from '../types';
 import { formatCPF } from '../utils/cpfValidator';
 
 export function PainelAdmin() {
   const {
     sorteio,
     participantes,
-    totalParticipantes,
     vencedor,
     vencedoresAcumulados,
-    totalVencedores,
     loading,
     criarNovoSorteio,
     abrirSorteioAtual,
     encerrarSorteioAtual,
     executarSorteioAtual,
     resetarSorteioAtual,
-    carregarParticipantes,
-    carregarSorteio,
-    carregarVencedores
+    carregarSorteio
   } = useSorteio();
+
+  const [modalVencedorAberto, setModalVencedorAberto] = useState(false);
+
+  useEffect(() => {
+    if (vencedor?.id) setModalVencedorAberto(true);
+  }, [vencedor?.id]);
 
   const handleExecutarSorteio = async (): Promise<string | null> => {
     if (participantes.length === 0) {
@@ -43,12 +44,6 @@ export function PainelAdmin() {
     }
   };
 
-  const handleSorteioCompleto = async (_vencedor: Participante) => {
-    await carregarSorteio();
-    await carregarParticipantes();
-    await carregarVencedores();
-  };
-
   const handleAcaoComConfirmacao = async (acao: () => Promise<void>, mensagem: string) => {
     if (window.confirm(mensagem)) {
       try {
@@ -60,180 +55,134 @@ export function PainelAdmin() {
     }
   };
 
-  const getStatusInfo = () => {
-    if (!sorteio) return { color: 'bg-gray-500', label: 'Nenhuma gorjeta' };
-    if (sorteio.vencedorId) return { color: 'bg-yellow-500', label: 'Gorjeta Sorteada' };
-    if (sorteio.aberto) return { color: 'bg-green-500', label: 'Aberta' };
-    return { color: 'bg-gray-500', label: 'Fechada' };
-  };
-
-  const statusInfo = getStatusInfo();
-
   return (
-    <div className="container mx-auto px-4 py-10">
-      <div className="flex flex-wrap justify-between items-center mb-10 gap-4">
-        <h1 className="text-5xl font-black text-white">💰 Painel de Gorjetas</h1>
-        <div className={`${statusInfo.color} text-white px-8 py-4 rounded-2xl font-bold text-xl shadow-2xl glow`}>
-          Status: {statusInfo.label}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-        <div className="glass-strong rounded-3xl p-8 text-center shadow-2xl glow card-hover">
-          <div className="text-6xl font-black text-gradient mb-3">{totalParticipantes}</div>
-          <div className="text-xl font-semibold text-white uppercase tracking-wider">Participantes</div>
-        </div>
-        <div className="glass-strong rounded-3xl p-8 text-center shadow-2xl glow card-hover">
-          <div className="text-4xl font-black text-gradient mb-3">{statusInfo.label}</div>
-          <div className="text-xl font-semibold text-white uppercase tracking-wider">Status</div>
-        </div>
-        <div className="glass-strong rounded-3xl p-8 text-center shadow-2xl glow card-hover">
-          <div className="text-6xl font-black text-gradient mb-3">{totalVencedores}</div>
-          <div className="text-xl font-semibold text-white uppercase tracking-wider">Vencedores Acumulados</div>
-        </div>
-      </div>
-
-      <div className="mb-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div className="min-h-screen flex flex-col overflow-y-auto scroll-panel bg-slate-900">
+      <div className="h-screen flex flex-col shrink-0">
+      <div className="flex-1 flex min-h-0">
+      <div
+        className="flex-1 min-w-0 flex flex-col overflow-y-auto scroll-panel px-4 py-6 bg-slate-900 bg-no-repeat bg-center relative"
+        style={{
+          backgroundImage: 'url(/nokain.png)',
+          backgroundSize: 'contain'
+        }}
+      >
+        <div
+          className="absolute inset-0 pointer-events-none bg-gradient-to-b from-slate-900/50 via-transparent to-slate-900/60"
+          aria-hidden
+        />
+        <div className="relative z-10 flex flex-col flex-1 min-h-0">
+        <div className="flex flex-wrap items-center gap-3 mb-4 shrink-0">
+          <h1 className="text-3xl md:text-4xl font-black text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">💰 Painel de Gorjetas</h1>
+        <div className="flex flex-wrap gap-2">
           {!sorteio ? (
             <button
-              onClick={() => handleAcaoComConfirmacao(
-                criarNovoSorteio,
-                'Deseja criar uma nova gorjeta?'
-              )}
+              onClick={() => handleAcaoComConfirmacao(criarNovoSorteio, 'Deseja criar uma nova gorjeta?')}
               disabled={loading}
-              className="px-8 py-5 button-gradient text-white font-bold rounded-2xl shadow-2xl glow-hover card-hover disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+              className="px-4 py-2.5 button-gradient text-white font-bold rounded-xl text-sm disabled:opacity-50"
             >
-              ➕ Criar Nova Gorjeta
+              ➕ Criar Gorjeta
             </button>
           ) : (
             <>
               {!sorteio.aberto && !sorteio.vencedorId && (
                 <button
-                  onClick={() => handleAcaoComConfirmacao(
-                    abrirSorteioAtual,
-                    'Deseja abrir a gorjeta para cadastros?'
-                  )}
+                  onClick={() => handleAcaoComConfirmacao(abrirSorteioAtual, 'Deseja abrir a gorjeta para cadastros?')}
                   disabled={loading}
-                  className="px-8 py-5 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-2xl shadow-2xl glow-hover card-hover disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+                  className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-xl text-sm shadow-lg shadow-emerald-900/30 disabled:opacity-50"
                 >
-                  🟢 Abrir Gorjeta
+                  🟢 Abrir
                 </button>
               )}
-
               {sorteio.aberto && (
                 <>
                   <button
-                    onClick={() => handleAcaoComConfirmacao(
-                      encerrarSorteioAtual,
-                      'Deseja encerrar a gorjeta? Todos os participantes serão removidos.'
-                    )}
+                    onClick={() => handleAcaoComConfirmacao(encerrarSorteioAtual, 'Encerrar gorjeta?')}
                     disabled={loading}
-                    className="px-8 py-5 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-2xl shadow-2xl glow-hover card-hover disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+                    className="px-4 py-2.5 bg-red-500 hover:bg-red-400 text-white font-bold rounded-xl text-sm shadow-lg shadow-red-900/30 disabled:opacity-50"
                   >
-                    🔴 Encerrar Gorjeta
+                    🔴 Encerrar
                   </button>
                   <button
                     onClick={handleExecutarSorteio}
                     disabled={loading || participantes.length === 0}
-                    className="px-8 py-5 button-gradient text-white font-bold rounded-2xl shadow-2xl glow-hover card-hover disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+                    className="px-4 py-2.5 button-gradient text-white font-bold rounded-xl text-sm disabled:opacity-50"
                   >
-                    🎲 Sortear Gorjeta
+                    🎲 Sortear
                   </button>
                 </>
               )}
-
               {sorteio.vencedorId && (
-                <button
-                  onClick={() => handleAcaoComConfirmacao(
-                    resetarSorteioAtual,
-                    'Deseja resetar e criar uma nova gorjeta? Todos os participantes serão removidos.'
-                  )}
-                  disabled={loading}
-                  className="px-8 py-5 button-gradient text-white font-bold rounded-2xl shadow-2xl glow-hover card-hover disabled:opacity-50 disabled:cursor-not-allowed text-lg"
-                >
-                  🔄 Resetar e Criar Nova
-                </button>
+                <>
+                  <button
+                    onClick={() => handleAcaoComConfirmacao(
+                      async () => {
+                        await executarSorteioAtual();
+                        await carregarSorteio();
+                      },
+                      'Sortear novamente?'
+                    )}
+                    disabled={loading || participantes.length === 0}
+                    className="px-4 py-2.5 button-gradient text-white font-bold rounded-xl text-sm disabled:opacity-50"
+                  >
+                    🎲 Sortear de novo
+                  </button>
+                  <button
+                    onClick={() => handleAcaoComConfirmacao(resetarSorteioAtual, 'Resetar e criar nova gorjeta?')}
+                    disabled={loading}
+                    className="px-4 py-2.5 bg-slate-600 hover:bg-slate-500 text-white font-bold rounded-xl text-sm shadow-lg disabled:opacity-50"
+                  >
+                    🔄 Nova gorjeta
+                  </button>
+                </>
               )}
             </>
           )}
         </div>
       </div>
 
-      {sorteio && sorteio.aberto && (
-        <div className="mb-10">
-          <RoletaAnimada
-            participantes={participantes}
-            onSorteioCompleto={handleSorteioCompleto}
-            onIniciarSorteio={handleExecutarSorteio}
-            vencedorId={sorteio.vencedorId || undefined}
-          />
         </div>
-      )}
+      </div>
 
-      {sorteio && sorteio.vencedorId && sorteio.aberto && (
-        <div className="mb-10">
-          <div className="text-center">
-            <button
-              onClick={() => handleAcaoComConfirmacao(
-                async () => {
-                  await executarSorteioAtual();
-                  await carregarSorteio();
-                },
-                'Deseja sortear novamente? Um novo vencedor será escolhido.'
-              )}
-              disabled={loading || participantes.length === 0}
-              className="px-10 py-5 button-gradient text-white font-bold rounded-2xl shadow-2xl glow-hover card-hover disabled:opacity-50 disabled:cursor-not-allowed text-xl"
-            >
-              🎲 Sortear Novamente
-            </button>
-          </div>
+      <aside className="w-80 md:w-96 shrink-0 flex flex-col rounded-l-2xl border-l-2 border-white/40 p-4 overflow-hidden bg-slate-900/80 backdrop-blur-xl shadow-2xl shadow-black/30">
+        <h2 className="text-lg font-black text-white mb-3 shrink-0">📋 Participantes ({participantes.length})</h2>
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-2 scroll-panel pr-1">
+          {participantes.length === 0 ? (
+            <p className="text-white/70 text-sm">Nenhum participante.</p>
+          ) : (
+            participantes.map((p) => (
+              <div key={p.id} className="glass rounded-xl p-3 border border-white/20 flex flex-col gap-0.5">
+                <span className="text-white font-semibold truncate text-sm">{p.nome}</span>
+                <span className="text-white/70 font-mono text-xs truncate">{p.chavePix}</span>
+              </div>
+            ))
+          )}
         </div>
-      )}
-
-      {vencedor && (
-        <div className="mb-10">
-          <div className="glass-strong rounded-3xl p-10 shadow-2xl glow border-4 border-yellow-400/50">
-            <h2 className="text-4xl font-black text-center mb-8 text-white">🏆 Vencedor da Gorjeta 🏆</h2>
-            <div className="glass rounded-3xl p-8 space-y-4 border-2 border-white/30">
-              <p className="text-xl"><strong className="text-white font-bold">Nome:</strong> <span className="text-white/90">{vencedor.nome}</span></p>
-              <p className="text-xl"><strong className="text-white font-bold">CPF:</strong> <span className="text-white/90">{formatCPF(vencedor.cpf)}</span></p>
-              <p className="text-xl"><strong className="text-white font-bold">Email:</strong> <span className="text-white/90">{vencedor.email}</span></p>
-              <p className="text-xl"><strong className="text-white font-bold">Chave Pix:</strong> <span className="text-white/90">{vencedor.chavePix}</span></p>
-              <p className="text-xl"><strong className="text-white font-bold">ID Usuário:</strong> <span className="text-white/90">{vencedor.idUsuario}</span></p>
-            </div>
-          </div>
-        </div>
-      )}
+      </aside>
+      </div>
+      </div>
 
       {vencedoresAcumulados.length > 0 && (
-        <div className="mb-10">
-          <h2 className="text-4xl font-black mb-8 text-white">🏆 Histórico de Vencedores ({vencedoresAcumulados.length})</h2>
-          <div className="glass-strong rounded-3xl p-8 shadow-2xl glow">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="shrink-0 px-4 py-5 bg-slate-900/95 border-t-2 border-amber-400/60 shadow-[0_-8px 32px rgba(0,0,0,0.3)]">
+          <h2 className="text-xl font-black mb-4 text-amber-300 drop-shadow-sm">🏆 Vencedores ({vencedoresAcumulados.length})</h2>
+          <div className="overflow-x-auto scroll-panel">
+            <div className="flex gap-4 pb-2 min-w-0">
               {vencedoresAcumulados.map((vencedorItem, index) => (
-                <div key={vencedorItem.id} className="glass rounded-2xl p-6 border-2 border-yellow-400/50 hover:border-yellow-400 transition-all shadow-xl card-hover">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-lg font-bold text-yellow-300">#{vencedoresAcumulados.length - index}</span>
-                    <span className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 px-3 py-1 rounded-lg text-xs font-black uppercase">
-                      🏆 VENCEDOR
-                    </span>
+                <div key={vencedorItem.id} className="bg-slate-800/90 rounded-2xl p-4 border-2 border-amber-400/70 shrink-0 w-56 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-500/20 transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-bold text-amber-300">#{vencedoresAcumulados.length - index}</span>
+                    <span className="bg-amber-400 text-slate-900 px-2 py-0.5 rounded font-black text-xs uppercase">🏆</span>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-xl font-bold text-white">{vencedorItem.participante.nome}</p>
-                    <p className="text-sm text-white/80">CPF: {formatCPF(vencedorItem.participante.cpf)}</p>
-                    <p className="text-sm text-white/80">Email: {vencedorItem.participante.email}</p>
-                    <p className="text-sm text-white/80">ID: {vencedorItem.participante.idUsuario}</p>
-                    <p className="text-xs text-white/60 mt-3">
-                      {vencedorItem.dataSorteio.toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
-                  </div>
+                  <p className="font-bold text-white">{vencedorItem.participante.nome}</p>
+                  <p className="text-xs text-slate-300">CPF: {formatCPF(vencedorItem.participante.cpf)} · ID: {vencedorItem.participante.idUsuario}</p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    {vencedorItem.dataSorteio.toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
                 </div>
               ))}
             </div>
@@ -241,34 +190,26 @@ export function PainelAdmin() {
         </div>
       )}
 
-      <div className="mb-10">
-        <h2 className="text-4xl font-black mb-8 text-white">📋 Lista de Participantes ({participantes.length})</h2>
-        {participantes.length === 0 ? (
-          <div className="glass-strong rounded-3xl p-12 text-center shadow-2xl glow">
-            <p className="text-2xl text-white/80">Nenhum participante cadastrado ainda.</p>
+      {vencedor && modalVencedorAberto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div
+            className="relative w-full max-w-md rounded-3xl p-8 border-4 border-amber-400 bg-slate-800/95 shadow-2xl shadow-amber-500/20"
+            style={{ animation: 'parabens-pop 0.5s ease-out forwards' }}
+          >
+            <p className="text-2xl font-black text-amber-300 uppercase tracking-wider text-center mb-1">🎉 Parabéns!</p>
+            <p className="text-2xl font-black text-white text-center mb-4">{vencedor.nome}</p>
+            <p className="text-lg text-white/90 text-center mb-6">
+              Chave Pix: <span className="font-mono font-semibold">{vencedor.chavePix}</span>
+            </p>
+            <button
+              onClick={() => setModalVencedorAberto(false)}
+              className="w-full py-3 bg-white/20 hover:bg-white/30 text-white font-bold rounded-xl transition-colors"
+            >
+              Fechar
+            </button>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {participantes.map((participante) => (
-              <div key={participante.id} className="glass rounded-2xl p-6 border-2 border-white/30 hover:border-white/60 transition-all shadow-xl card-hover">
-                <div className="flex justify-between items-start mb-4">
-                  <span className="text-xl font-bold text-white">{participante.nome}</span>
-                  {vencedor?.id === participante.id && (
-                    <span className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider">
-                      🏆 VENCEDOR
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-2 text-sm text-white/80">
-                  <p>CPF: {formatCPF(participante.cpf)}</p>
-                  <p>Email: {participante.email}</p>
-                  <p>ID: {participante.idUsuario}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {loading && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
