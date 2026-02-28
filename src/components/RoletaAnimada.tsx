@@ -177,7 +177,7 @@ export function RoletaAnimada({ participantes, onSorteioCompleto, onIniciarSorte
                 <div className="text-lg font-bold text-white mb-3 text-center">{vencedor.nome}</div>
                 <div className="space-y-2 text-sm text-white/90">
                   <p>📧 {vencedor.email}</p>
-                  <p>🆔 {vencedor.idUsuario}</p>
+                  <p>👤 {vencedor.idUsuario}</p>
                   <p>💳 {vencedor.chavePix}</p>
                 </div>
               </div>

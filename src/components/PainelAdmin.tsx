@@ -177,7 +177,7 @@ export function PainelAdmin() {
                     <p>CPF: {formatCPF(vencedorItem.participante.cpf)}</p>
                     <p>Email: {vencedorItem.participante.email}</p>
                     <p>Chave Pix: <span className="font-mono">{vencedorItem.participante.chavePix}</span></p>
-                    <p>ID: {vencedorItem.participante.idUsuario}</p>
+                    <p>Nome do usuário: {vencedorItem.participante.idUsuario}</p>
                   </div>
                   {vencedorItem.participante.fotoContaUrl && (
                     <a

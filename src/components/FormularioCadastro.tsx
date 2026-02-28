@@ -55,7 +55,7 @@ export function FormularioCadastro() {
         try {
           const jaExiste = await idJaCadastrado(formData.idUsuario.trim());
           if (jaExiste) {
-            setErrors(prev => ({ ...prev, idUsuario: 'ID do usuário já cadastrado' }));
+            setErrors(prev => ({ ...prev, idUsuario: 'Nome do usuário já cadastrado' }));
           } else {
             setErrors(prev => {
               const newErrors = { ...prev };
@@ -64,7 +64,7 @@ export function FormularioCadastro() {
             });
           }
         } catch (error) {
-          console.error('Erro ao verificar ID:', error);
+          console.error('Erro ao verificar nome do usuário:', error);
         } finally {
           setIdValidando(false);
         }
@@ -138,7 +138,7 @@ export function FormularioCadastro() {
       }
     }
     if (!formData.idUsuario.trim()) {
-      newErrors.idUsuario = 'ID do usuário é obrigatório';
+      newErrors.idUsuario = 'Nome do usuário é obrigatório';
     }
 
     setErrors(newErrors);
@@ -167,7 +167,7 @@ export function FormularioCadastro() {
       
       const idJaExiste = await idJaCadastrado(formData.idUsuario.trim());
       if (idJaExiste) {
-        setErrors({ idUsuario: 'ID do usuário já cadastrado' });
+        setErrors({ idUsuario: 'Nome do usuário já cadastrado' });
         return;
       }
     } catch (error) {
@@ -367,7 +367,7 @@ export function FormularioCadastro() {
 
           <div>
             <label htmlFor="idUsuario" className="block text-sm font-bold text-white mb-3 uppercase tracking-wider text-lg">
-              🆔 ID do Usuário *
+              👤 Nome do usuário *
             </label>
             <input
               type="text"
@@ -383,11 +383,11 @@ export function FormularioCadastro() {
               } ${
                 (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-slate-700/40'
               }`}
-              placeholder="Seu ID na plataforma"
+              placeholder="Seu nome de usuário na plataforma"
             />
             {idValidando && (
               <p className="mt-2 text-sm text-amber-300 flex items-center gap-2 font-semibold">
-                <span className="animate-spin">⏳</span> Verificando ID...
+                <span className="animate-spin">⏳</span> Verificando nome do usuário...
               </p>
             )}
             {errors.idUsuario && (

@@ -47,7 +47,7 @@ export async function cadastrarParticipante(
   }
   
   if (await idJaCadastrado(dados.idUsuario)) {
-    throw new Error('ID do usuário já cadastrado neste sorteio');
+    throw new Error('Nome do usuário já cadastrado neste sorteio');
   }
   
   try {
