@@ -93,6 +93,14 @@ export async function getTotalVencedores(): Promise<number> {
   return querySnapshot.size;
 }
 
+export async function getIdsParticipantesJaSorteados(): Promise<string[]> {
+  const vencedoresRef = collection(firestore, VENCEDORES_COLLECTION);
+  const querySnapshot = await getDocs(vencedoresRef);
+  return querySnapshot.docs
+    .map((d) => d.data().participanteId as string)
+    .filter(Boolean);
+}
+
 export async function limparVencedores(): Promise<void> {
   const vencedoresRef = collection(firestore, VENCEDORES_COLLECTION);
   const querySnapshot = await getDocs(vencedoresRef);

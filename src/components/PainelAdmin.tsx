@@ -2,6 +2,42 @@ import { useState, useEffect } from 'react';
 import { useSorteio } from '../contexts/SorteioContext';
 import { formatCPF } from '../utils/cpfValidator';
 
+function abrirImagemEmNovaAba(url: string) {
+  if (!url) return;
+
+  if (!url.startsWith('data:')) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+
+  try {
+    const [header, payload] = url.split(',');
+    if (!header || !payload) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    const mimeMatch = header.match(/^data:(.*?)(;base64)?$/);
+    const mimeType = mimeMatch?.[1] || 'image/jpeg';
+    const rawBase64 = decodeURIComponent(payload).replace(/\s/g, '');
+    const bytes = atob(rawBase64);
+    const array = new Uint8Array(bytes.length);
+
+    for (let i = 0; i < bytes.length; i++) {
+      array[i] = bytes.charCodeAt(i);
+    }
+
+    const blob = new Blob([array], { type: mimeType });
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl, '_blank', 'noopener,noreferrer');
+
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+  } catch (error) {
+    console.error('Erro ao abrir imagem em nova aba:', error);
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+}
+
 export function PainelAdmin() {
   const {
     sorteio,
@@ -180,14 +216,13 @@ export function PainelAdmin() {
                     <p>Nome do usuário: {vencedorItem.participante.idUsuario}</p>
                   </div>
                   {vencedorItem.participante.fotoContaUrl && (
-                    <a
-                      href={vencedorItem.participante.fotoContaUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      type="button"
+                      onClick={() => abrirImagemEmNovaAba(vencedorItem.participante.fotoContaUrl!)}
                       className="inline-flex items-center gap-2 mt-2 text-sm font-semibold text-amber-400 hover:text-amber-300 underline"
                     >
                       📷 Ver print da conta
-                    </a>
+                    </button>
                   )}
                   <p className="text-xs text-slate-400 mt-3">
                     {vencedorItem.dataSorteio.toLocaleDateString('pt-BR', {

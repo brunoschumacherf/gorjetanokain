@@ -9,7 +9,7 @@ import {
 } from 'firebase/firestore';
 import { firestore } from '../config/firebase';
 import type { Sorteio } from '../types';
-import { salvarVencedor, limparVencedores } from './vencedorService';
+import { salvarVencedor, limparVencedores, getIdsParticipantesJaSorteados } from './vencedorService';
 
 const SORTEIO_COLLECTION = 'sorteio';
 const PARTICIPANTES_COLLECTION = 'paricipantes';
@@ -112,9 +112,13 @@ export async function executarSorteio(sorteioId: string): Promise<string | null>
     return null;
   }
   
-  const participantes = participantesSnapshot.docs;
-  const indiceVencedor = Math.floor(Math.random() * participantes.length);
-  const vencedorDoc = participantes[indiceVencedor];
+  const idsJaSorteados = await getIdsParticipantesJaSorteados();
+  const participantes = participantesSnapshot.docs.filter(
+    (d) => !idsJaSorteados.includes(d.id)
+  );
+  const candidatos = participantes.length > 0 ? participantes : participantesSnapshot.docs;
+  const indiceVencedor = Math.floor(Math.random() * candidatos.length);
+  const vencedorDoc = candidatos[indiceVencedor];
   const vencedorId = vencedorDoc.id;
   
   // Salvar vencedor na coleção de vencedores (acumular histórico)
