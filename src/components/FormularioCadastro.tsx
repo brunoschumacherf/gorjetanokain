@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { cadastrarParticipante, cpfJaCadastrado, idJaCadastrado } from '../services/participanteService';
 import { compressImageAsDataUrl } from '../utils/imageCompress';
 import { isValidCPF, formatCPF, cleanCPF } from '../utils/cpfValidator';
+import { isValidWhatsApp, formatPhone, cleanPhone } from '../utils/phoneValidator';
 import { useSorteio } from '../contexts/SorteioContext';
 
 export function FormularioCadastro() {
@@ -10,6 +11,7 @@ export function FormularioCadastro() {
     nome: '',
     cpf: '',
     email: '',
+    whatsapp: '',
     chavePix: '',
     idUsuario: ''
   });
@@ -92,6 +94,22 @@ export function FormularioCadastro() {
           });
         }
       }
+    } else if (name === 'whatsapp') {
+      const phoneLimpo = cleanPhone(value);
+      const maxDigits = phoneLimpo.startsWith('55') ? 13 : 11;
+      if (phoneLimpo.length <= maxDigits) {
+        setFormData(prev => ({ ...prev, [name]: formatPhone(phoneLimpo) }));
+
+        if (phoneLimpo.length >= 10 && !isValidWhatsApp(phoneLimpo)) {
+          setErrors(prev => ({ ...prev, whatsapp: 'WhatsApp inválido' }));
+        } else if (phoneLimpo.length < 10) {
+          setErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors.whatsapp;
+            return newErrors;
+          });
+        }
+      }
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
       if (errors[name]) {
@@ -119,6 +137,11 @@ export function FormularioCadastro() {
       newErrors.email = 'Email é obrigatório';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Email inválido';
+    }
+    if (!formData.whatsapp.trim()) {
+      newErrors.whatsapp = 'WhatsApp é obrigatório';
+    } else if (!isValidWhatsApp(formData.whatsapp)) {
+      newErrors.whatsapp = 'WhatsApp inválido';
     }
     if (!formData.chavePix.trim()) {
       newErrors.chavePix = 'Chave Pix é obrigatória';
@@ -184,6 +207,7 @@ export function FormularioCadastro() {
         nome: formData.nome.trim(),
         cpf: cpfLimpo,
         email: formData.email.trim(),
+        whatsapp: cleanPhone(formData.whatsapp),
         chavePix: formData.chavePix.trim(),
         idUsuario: formData.idUsuario.trim(),
         fotoContaUrl: uploadedImageUrl || undefined
@@ -194,6 +218,7 @@ export function FormularioCadastro() {
         nome: '',
         cpf: '',
         email: '',
+        whatsapp: '',
         chavePix: '',
         idUsuario: ''
       });
@@ -334,6 +359,34 @@ export function FormularioCadastro() {
             {errors.email && (
               <p className="mt-2 text-sm text-red-300 flex items-center gap-2 font-semibold">
                 <span>⚠️</span> {errors.email}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="whatsapp" className="block text-sm font-bold text-white mb-3 uppercase tracking-wider text-lg">
+              📱 WhatsApp *
+            </label>
+            <input
+              type="tel"
+              id="whatsapp"
+              name="whatsapp"
+              value={formData.whatsapp}
+              onChange={handleChange}
+              disabled={!sorteioAberto || loading}
+              className={`w-full px-5 py-4 rounded-2xl border-2 text-white placeholder-slate-400 focus:outline-none focus:ring-4 transition-all duration-300 ${
+                errors.whatsapp 
+                  ? 'border-red-400 focus:border-red-300 focus:ring-red-300/50 bg-red-900/30' 
+                  : 'border-amber-400/50 focus:border-amber-400 focus:ring-amber-400/30 bg-slate-700/60'
+              } ${
+                (!sorteioAberto || loading) && 'opacity-50 cursor-not-allowed bg-slate-700/40'
+              }`}
+              placeholder="(11) 99999-9999"
+              maxLength={18}
+            />
+            {errors.whatsapp && (
+              <p className="mt-2 text-sm text-red-300 flex items-center gap-2 font-semibold">
+                <span>⚠️</span> {errors.whatsapp}
               </p>
             )}
           </div>

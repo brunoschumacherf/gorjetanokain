@@ -3,6 +3,7 @@ export interface Participante {
   nome: string;
   cpf: string;
   email: string;
+  whatsapp: string;
   chavePix: string;
   idUsuario: string;
   dataCadastro: Date;

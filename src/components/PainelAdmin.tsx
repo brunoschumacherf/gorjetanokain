@@ -188,6 +188,7 @@ export function PainelAdmin() {
             participantes.map((p) => (
               <div key={p.id} className="glass rounded-xl p-4 border border-white/20 flex flex-col gap-1">
                 <p className="text-white font-semibold truncate text-base"><span className="text-amber-300/90 text-sm font-medium">Nome:</span> {p.nome}</p>
+                <p className="text-white/70 text-sm truncate"><span className="text-amber-300/90 font-medium text-sm">WhatsApp:</span> {p.whatsapp || '—'}</p>
                 <p className="text-white/70 font-mono text-sm truncate"><span className="text-amber-300/90 font-sans font-medium text-sm">Chave Pix:</span> {p.chavePix}</p>
               </div>
             ))
@@ -212,6 +213,7 @@ export function PainelAdmin() {
                   <div className="space-y-1 text-sm text-slate-300">
                     <p>CPF: {formatCPF(vencedorItem.participante.cpf)}</p>
                     <p>Email: {vencedorItem.participante.email}</p>
+                    <p>WhatsApp: {vencedorItem.participante.whatsapp || '—'}</p>
                     <p>Chave Pix: <span className="font-mono">{vencedorItem.participante.chavePix}</span></p>
                     <p>Nome do usuário: {vencedorItem.participante.idUsuario}</p>
                   </div>
